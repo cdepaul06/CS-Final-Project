@@ -4,3 +4,8 @@
 :root {
     background-color: cadetblue;
 }
+
+/* This area will be for any specific styling we need for certain elements/components of the game */
+.someSpecificCSSClass {
+    background-color: red;
+}
