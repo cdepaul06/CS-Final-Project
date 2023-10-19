@@ -1,3 +1,6 @@
+/* Import google fonts from the web to be used in our game */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
 /* * This is just a placeholder for our base styles, each entity we have (depending on the game we make, should have it's own
  * css file so that we can keep our code clean and organized and we don't have any conflicting css in the game.
  * */
