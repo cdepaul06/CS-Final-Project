@@ -5,12 +5,22 @@
     <link rel="stylesheet" type="text/css" href="styles/base.css" />
     <meta charset="utf-8" />
   </head>
-  <body>
     <!-- Simple example for us to call our JavaScript functions -->
-    <button onclick="someFunction(1234)">Click Me!</button>
+    <button onclick="someFunction(1234)" title="Click Me!">Click Me!</button>
+
+    <!-- Include a Play Button, Options Button, and Authors button-->
+    <button id="playButton" class="button" onclick="playGame()">Play</button>
+    <button
+      id="optionsButton"
+      class="button"
+      onclick="options()"
+    >Options</button>
+    <button
+      id="authorsButton"
+      class="button"
+      onclick="authors()"
+    >Authors</button>
 
     <script type="text/javascript" src="functions/BaseLogic.js"></script>
-
-    <p>checking for merge into main</p>
   </body>
 </html>
