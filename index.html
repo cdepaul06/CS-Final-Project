@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>My Game</title>
+    <title>Play UNO</title>
     <link rel="stylesheet" type="text/css" href="styles/base.css" />
     <meta charset="utf-8" />
   </head>
     <!-- Simple example for us to call our JavaScript functions -->
-    <button onclick="someFunction(1234)" title="Click Me!">Click Me!</button>
+    <!-- <button onclick="someFunction(1234)" title="Click Me!">Click Me!</button> -->
 
+    <h1>Play UNO!</h1>
+    <div class="container">
     <!-- Include a Play Button, Options Button, and Authors button-->
-    <button id="playButton" class="button" onclick="playGame()">Play</button>
+    <a href="uno.html"><button id="playButton" class="button">Play</button></a>
     <button
       id="optionsButton"
       class="button"
@@ -20,6 +22,7 @@
       class="button"
       onclick="authors()"
     >Authors</button>
+  </div>
 
     <script type="text/javascript" src="functions/BaseLogic.js"></script>
   </body>

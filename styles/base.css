@@ -5,6 +5,51 @@
  * css file so that we can keep our code clean and organized and we don't have any conflicting css in the game.
  * */
 :root {
+    background-color: rgb(1, 119, 148);
+}
+
+/* Setup the main page buttons to have a hover effect that transitions smoothly */
+.button {
     background-color: rgb(9, 36, 58);
+    border: 2px solid rgb(9, 36, 58);
+    border-radius: 5px;
+    color: white;
+    font-size: 1.5em;
+    padding: 1rem;
+    margin: 0.5rem;
+    text-align: center;
+    text-decoration: none;
+    width: 200px;
+    transition: background-color 0.5s ease;
+}
+
+.button:hover {
+    background-color: rgb(27, 64, 94);
+    color: green;
+    cursor: pointer;
+}
+
+/* Center the buttons and add a border to the div */
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 45vh;
+    width: 25vw;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 2rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+h1 {
+    font-size: 3em;
+    margin-top: 10rem;
+    color: white;
+    text-align: center;
+    text-shadow: 0.2rem 0.2rem 4px rgba(0, 0, 0, 0.5);
 }
 
