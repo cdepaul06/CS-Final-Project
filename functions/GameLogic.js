@@ -31,7 +31,7 @@ const generateNumCards = (cardColor, cardNumber) => {
   parentElement.appendChild(cardElement);
 };
 
-const generateWildCard = (cardColor = "Special", cardNumber = "Wild") => {
+const generatespecialCard = (cardColor, action, symbol) => {
   const parentElement = document.getElementById("cards-container");
 
   // Create card structure
