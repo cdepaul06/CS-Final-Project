@@ -1,3 +1,16 @@
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  height: 75vh;
+  width: 75vw;
+  padding: 20px;
+  background-color: forestgreen;
+  border: 3.5rem solid #493c03;
+  border-radius: 20rem;
+}
+
 /* Base style for the UNO card */
 .uno-card {
   width: 150px;
@@ -19,21 +32,25 @@
 .uno-card.red {
   background-color: #FF5555;
   color: #FF5555; /* Set the color for red card */
+  border: 2px solid #fff; /* Add a white border to red cards */
 }
 
 .uno-card.yellow {
   background-color: #FFD800;
   color: #FFD800; /* Set the color for yellow card */
+  border: 2px solid #fff; /* Add a white border to yellow cards */
 }
 
 .uno-card.green {
   background-color: #008744;
   color: #008744; /* Set the color for green card */
+  border: 2px solid #fff; /* Add a white border to green cards */
 }
 
 .uno-card.blue {
   background-color: #0057e7;
   color: #0057e7; /* Set the color for blue card */
+  border: 2px solid #fff; /* Add a white border to blue cards */
 }
 
 /* White slanted oval stretching from near the top right to top left */
@@ -52,8 +69,6 @@
   transform: translate(-50%, -50%) rotate(-40deg);
   z-index: 0; /* Behind the number */
 }
-
-
 
 /* Number in the middle of the card */
 .uno-card .number {
