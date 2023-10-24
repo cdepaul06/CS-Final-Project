@@ -1,5 +1,5 @@
 // This function can be used to create a single card or even a full deck of cards if we pass an array of numbers
-const insertCard = (cardColor, cardNumber) => {
+const generateCardHtml = (cardColor, cardNumber) => {
   const parentElement = document.getElementById("cards-container");
 
   // Create card structure
