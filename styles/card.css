@@ -1,3 +1,6 @@
+/* Import google fonts from the web to be used in our game */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
 .cards-container {
   display: flex;
   flex-wrap: wrap;
