@@ -59,8 +59,9 @@
 /* Special cards */
 .uno-card.wild {
   background-color: #000;
-  color: #fff; /* Set the color for wild card */
+  color: #000; /* Set the color for wild card */
   border: 2px solid #fff; /* Add a white border to wild cards */
+  font-size: 2rem;
 }
 
 .uno-card.wild-draw-four {
