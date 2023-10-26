@@ -1,6 +1,11 @@
 //global  variables
 let deck = [];
-let players = [];
+let players = [
+  {
+    name: "",
+    hand: [],
+  },
+];
 let currentPlayer = 0;
 let direction = 1;
 let currentCardColor = "";
