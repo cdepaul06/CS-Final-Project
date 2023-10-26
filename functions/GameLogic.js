@@ -31,12 +31,7 @@ const generateNumCards = (cardColor, cardNumber) => {
   parentElement.appendChild(cardElement);
 };
 
-const generatespecialCard = (
-  cardColor,
-  cardNumber = "Wild",
-  action,
-  symbol
-) => {
+const generatespecialCard = (cardColor, cardNumber = "Wild") => {
   const parentElement = document.getElementById("cards-container");
 
   // Create card structure
@@ -66,4 +61,28 @@ const generatespecialCard = (
 
   // Append the card to the parent element
   parentElement.appendChild(cardElement);
+};
+
+// function to deal the cards to the players
+const dealCards = () => {
+  // loop through the players
+  for (let i = 0; i < players.length; i++) {
+    // loop through the cards
+    for (let j = 0; j < 7; j++) {
+      // get a random card
+      const randomCard = getRandomCard();
+      // push the card to the player's hand
+      players[i].hand.push(randomCard);
+      // remove the card from the deck
+      deck.splice(randomCard, 1);
+    }
+  }
+};
+
+// function to get a random card from the deck
+const getRandomCard = () => {
+  // get a random number between 0 and the length of the deck
+  const randomCard = Math.floor(Math.random() * deck.length);
+  // return the random card
+  return randomCard;
 };
