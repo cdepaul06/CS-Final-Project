@@ -6,6 +6,7 @@ let direction = 1;
 let currentCardColor = "";
 let currentCardNumber = 0;
 let isWildCard = false;
+let wildCardColor = "";
 
 // This function can be used to create a single card or even a full deck of cards if we pass an array of numbers
 const generateNumCards = (cardColor, cardNumber) => {
