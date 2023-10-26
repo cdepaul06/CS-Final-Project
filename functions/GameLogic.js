@@ -1,5 +1,27 @@
 //global  variables
-let deck = [];
+let deck = [
+  {
+    color: null,
+    number: null,
+  },
+];
+
+const generateDeck = (colors, numbers) => {
+  for (let i = 0; i < colors.length; i++) {
+    for (let j = 0; j < numbers.length; j++) {
+      deck.push({
+        color: colors[i],
+        number: numbers[j],
+      });
+    }
+  }
+};
+
+generateDeck(
+  ["red", "blue", "green", "yellow"],
+  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+);
+
 let players = [
   {
     name: "",
@@ -78,6 +100,14 @@ const generatespecialCard = (cardColor, cardNumber = "Wild") => {
   parentElement.appendChild(cardElement);
 };
 
+// function to get a random card from the deck
+const getRandomCard = () => {
+  // get a random number between 0 and the length of the deck
+  const randomCard = Math.floor(Math.random() * deck.length);
+  // return the random card
+  return randomCard;
+};
+
 // function to deal the cards to the players
 const dealCards = () => {
   // loop through the players
@@ -92,12 +122,4 @@ const dealCards = () => {
       deck.splice(randomCard, 1);
     }
   }
-};
-
-// function to get a random card from the deck
-const getRandomCard = () => {
-  // get a random number between 0 and the length of the deck
-  const randomCard = Math.floor(Math.random() * deck.length);
-  // return the random card
-  return randomCard;
 };
