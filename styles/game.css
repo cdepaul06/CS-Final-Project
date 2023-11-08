@@ -1,6 +1,10 @@
 /* Import google fonts from the web to be used in our game */
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 
+:root {
+  background-image: url('../assets/Crystal_BG.png');
+}
+
 .cards-container {
   display: flex;
   flex-wrap: wrap;
@@ -108,4 +112,16 @@
   font-size: 0.8em;
   z-index: 1;
   transform: rotate(180deg);
+}
+
+.player-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  background-color: rgb(24, 94, 24);
+  border: 0.2rem solid #ffffff;
+  border-radius: 20rem;
+  margin-top: 10px;
+  width: 
 }
