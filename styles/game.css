@@ -5,6 +5,7 @@
   background-image: url('../assets/Crystal_BG.png');
 }
 
+/* Main container for the card table */
 .cards-container {
   display: flex;
   flex-wrap: wrap;
