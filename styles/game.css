@@ -123,5 +123,7 @@
   border: 0.2rem solid #ffffff;
   border-radius: 20rem;
   margin-top: 10px;
-  width: 
+  width: 50vw;
+  position: absolute;
+  left: 25vw;
 }
