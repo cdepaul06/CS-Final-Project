@@ -7,28 +7,34 @@
 
 /* Main container for the card table */
 .cards-container {
-  display: flex;
+  /* display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: center;
+  align-items: center; */
   margin: 0 auto;
   height: 75vh;
   width: 75vw;
   padding: 20px;
   background-color: rgb(24, 94, 24);
-  border: 3.5rem solid #493c03;
+  border: 3.1rem solid #493c03;
   border-radius: 20rem;
+
+  .player-cards {
+    display: block;
+  }
+
+
 }
 
 /* Base style for the UNO card */
 .uno-card {
-  width: 150px;
-  height: 210px;
+  width: 116px;
+  height: 150px;
   border-radius: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3em;
+  font-size: 12px;
   font-weight: bold;
   color: white;
   box-shadow: 0.4rem 0.2rem 1rem rgba(0, 0, 0, 0.4);
@@ -67,13 +73,13 @@
   background-color: #000;
   color: #000; /* Set the color for wild card */
   border: 2px solid #fff; /* Add a white border to wild cards */
-  font-size: 2rem;
+  font-size: 0.5rem;
 }
 
 /* White slanted oval stretching from near the top right to top left */
 .uno-card .circle {
-  width: 150px;          /* Adjusted to make the shape an oval */
-  height: 90px;          /* Adjusted to make the shape an oval */
+  width: 95px;          /* Adjusted to make the shape an oval */
+  height: 60px;          /* Adjusted to make the shape an oval */
   background-color: white;
   border-radius: 50%;
   transform: rotate(-20deg); /* Fine-tuned the rotation for desired slant */
@@ -90,6 +96,7 @@
 /* Number in the middle of the card */
 .uno-card .number {
   z-index: 2;
+  font-size: 1.4rem;
   position: relative; /* Added to ensure z-index works correctly */
   color: inherit; /* Inherit color from parent .uno-card */
 }
@@ -100,7 +107,7 @@
   top: 10px;
   left: 10px;
   color: white;
-  font-size: 0.8em;
+  font-size: 1.4rem;
   z-index: 1;
 }
 
@@ -110,21 +117,110 @@
   bottom: 10px;
   color: white;
   right: 10px;
-  font-size: 0.8em;
+  font-size: 1.4rem;
   z-index: 1;
   transform: rotate(180deg);
 }
 
+/* Holds all of the buttons the player can use while playing */
 .player-button-container {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 10px;
-  background-color: rgb(24, 94, 24);
+  background-color: rgb(0, 0, 0);
   border: 0.2rem solid #ffffff;
   border-radius: 20rem;
-  margin-top: 10px;
   width: 50vw;
   position: absolute;
   left: 25vw;
 }
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 50%; /* Center the modal horizontally */
+  top: 50%; /* Center the modal vertically */
+  width: 50%; /* Width of the modal */
+  height: auto; /* Height based on content */
+  transform: translate(-50%, -50%); /* Adjust position to truly center the modal */
+  overflow: auto; /* Enable scroll if needed */
+}
+
+.modal-content {
+  background-color: #000000;
+  align-items: center;
+  color: #ffffff;
+  margin: auto; /* Auto margin for centering */
+  padding: 20px;
+  border: 1px solid #ffffff;
+  border-radius: 30px;
+  width: 80%; /* Width of the content within the modal */
+}
+
+/* The Close Button */
+.close {
+  color: #ffffff;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: rgb(252, 0, 0); /* Hover */
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.player-name {
+  position: relative;
+  left: 25vw;
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  width: 20%;
+  border-radius: 30px;
+  padding: 5px;
+  font-size: 20px;
+  margin: 5px 0 5px 0px;
+  display: none; /* Initially hide the container */
+}
+
+
+.player-cards, .opponent-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px; /* Space between player and opponent cards */
+}
+
+.player-cards {
+  /* Additional styling specifically for the human player's cards */
+}
+
+.opponent-card {
+  width: 60px; /* Adjust as needed */
+  height: 100px; /* Adjust as needed */
+  background-color: #0073e6; /* A typical blue, adjust as per your preference */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px; /* Gives the card rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: adds some depth */
+  margin: 5px; /* Spacing between cards */
+  backface-visibility: hidden; /* Ensures only the "back" is visible */
+}
+
+.opponent-card::before {
+  content: ""; /* Add a pattern or symbol here if desired */
+  display: block;
+  width: 80%; /* Relative to the card size */
+  height: 80%; /* Relative to the card size */
+  background: #fff; /* White */
+}
+
