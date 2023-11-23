@@ -11,7 +11,6 @@
 }
 
 #card-deck canvas {
-  margin: 5px;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
   transition: transform 0.2s;
 }
@@ -20,12 +19,17 @@
   transform: translateY(-10px);
 }
 
+#card-pile {
+  margin-left: 5rem; /* Adjust as needed for your layout */
+}
+
+
 /* Main container for the card table */
 .cards-container {
-  /* display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center; */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Aligns children at top and bottom */
+  align-items: center;
   margin: 0 auto;
   height: 75vh;
   width: 75vw;
@@ -34,9 +38,35 @@
   border: 3.1rem solid #493c03;
   border-radius: 20rem;
 
-  .player-cards {
-    display: block;
+  #card-pile {
+    margin-left: 5rem; /* Adjust as needed for your layout */
+    width: 73px;
+    height: 110px;
   }
+}
+
+.player-cards {
+  display: flex;
+  margin: 5px;
+}
+
+.player-cards canvas {
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.player-cards canvas:hover {
+  transform: translateY(-10px);
+}
+
+.player-name {
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  width: 20%;
+  border-radius: 30px;
+  padding: 10px;
+  font-size: 20px;
+  width: auto;
 }
 
 
@@ -91,19 +121,5 @@
   color: rgb(252, 0, 0); /* Hover */
   text-decoration: none;
   cursor: pointer;
-}
-
-.player-name {
-  position: relative;
-  left: 25vw;
-  background-color: #000000;
-  color: #ffffff;
-  border: 1px solid #ffffff;
-  width: 20%;
-  border-radius: 30px;
-  padding: 5px;
-  font-size: 20px;
-  margin: 5px 0 5px 0px;
-  display: none; /* Initially hide the container */
 }
 

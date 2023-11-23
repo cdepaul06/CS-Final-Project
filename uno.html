@@ -23,24 +23,21 @@
   </div>
 </div>
 
-
-   
  <!-- This is the main container for the game, it will house all the cards, but we can
         always add more to it, this is just a placeholder for now -->
         <div id="cards-container" class="cards-container">
-          <div id="card-deck"></div>
-
-        </div>
+          <img id="card-pile" src="./assets/uno.svg" alt="Card Pile" />
         
-
+          <div class="player-area">
+            <div id="player-cards" class="player-cards"></div>
+            <div id="playerNameDisplay" class="player-name"></div>
+          </div>
+        </div>
   <div>
-    <div id="playerNameDisplay" class="player-name"></div>
     <div class="player-button-container">
       <button id="shuffle-deal">Shuffle and Deal</button>
       </div>
   </div>
-
-
     <script type="text/javascript" src="functions/GameLogic.js"></script>
   </body>
 </html>

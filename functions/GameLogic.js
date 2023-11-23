@@ -1,3 +1,12 @@
+//#region Global Variables
+var players = []; // Array to hold each player's hand
+var deck = []; // Array to hold the deck of cards
+const shuffleDealButton = document.getElementById("shuffle-deal");
+const cardWidth = 73;
+const cardHeight = 110;
+
+//#endregion
+
 //#region Card Generation
 
 const cardColor = (num) => {
@@ -45,11 +54,31 @@ const cardType = (num) => {
   }
 };
 
-const cardDeckEl = document.getElementById("card-deck");
-const shuffleDealButton = document.getElementById("shuffle-deal");
+// Load the image
+const cardImage = new Image();
+cardImage.src = "./assets/deck.svg";
 
-const cardWidth = 73;
-const cardHeight = 110;
+// Create the deck (this is a simplified version)
+cardImage.onload = () => {
+  let num = 0;
+  for (let y = 0; y < 8 * cardHeight; y += cardHeight) {
+    for (let x = 0, count = 0; count < 14; x += cardWidth, count++) {
+      // Skip the first card in rows 5-8
+      if (y >= 4 * cardHeight && count === 0) {
+        num++;
+        continue;
+      }
+      const cardEl = createCardElement(cardImage, x + 1, y - 1);
+      cardEl.dataset.color = cardColor(num);
+      cardEl.dataset.type = cardType(num);
+      deck.push(cardEl);
+      // Do not append to cardDeckEl here
+      num++;
+    }
+  }
+  // Optionally, show the number of cards in the deck
+  console.log("Deck initialized with " + deck.length + " cards.");
+};
 
 // Function to create a canvas with a specific card drawn on it
 const createCardElement = (cardImage, x, y) => {
@@ -70,26 +99,8 @@ const createCardElement = (cardImage, x, y) => {
   );
   return canvas;
 };
-
-// Load the image
-const cardImage = new Image();
-cardImage.src = "./assets/deck.svg";
-
-// Create the deck (this is a simplified version)
-const deck = [];
-cardImage.onload = () => {
-  let num = 0; // Start with card number 0
-  for (let y = 0; y < cardImage.height; y += cardHeight) {
-    for (let x = 0; x < cardImage.width; x += cardWidth) {
-      const cardEl = createCardElement(cardImage, x + 1, y - 1); // Adjust for SVG padding, this ensures cards are spaced correctly
-      cardEl.dataset.color = cardColor(num);
-      cardEl.dataset.type = cardType(num);
-      deck.push(cardEl);
-      cardDeckEl.appendChild(cardEl);
-      num++; // Increment card number for next card
-    }
-  }
-};
+const cardPile = document.getElementById("card-pile");
+const cardDeckEl = document.getElementById("card-deck");
 
 // Shuffle the deck
 const shuffleDeck = () => {
@@ -97,14 +108,8 @@ const shuffleDeck = () => {
     const j = Math.floor(Math.random() * (i + 1));
     [deck[i], deck[j]] = [deck[j], deck[i]];
   }
-  // Update the DOM
-  cardDeckEl.innerHTML = "";
-  deck.forEach((cardEl) => {
-    cardDeckEl.appendChild(cardEl);
-    console.log(
-      `Card Color: ${cardEl.dataset.color}, Card Type: ${cardEl.dataset.type}`
-    );
-  });
+  // Do not append cards to the DOM here
+  console.log("Deck shuffled.");
 };
 
 shuffleDealButton.addEventListener("click", shuffleDeck);
@@ -153,5 +158,52 @@ const startGame = () => {
 
   // Close the modal after selection
   document.getElementById("opponentSelectDialog").style.display = "none";
+  initializePlayers(opponentCount, playerName);
+  shuffleDeck();
+  dealCards();
 };
+
+// Function to initialize players
+const initializePlayers = (opponentCount, playerName) => {
+  for (let i = 0; i <= opponentCount; i++) {
+    players.push({ name: i === 0 ? playerName : `Opponent ${i}`, hand: [] });
+  }
+};
+
+// Function to deal cards
+const dealCards = () => {
+  const playerCardsContainer = document.getElementById("player-cards");
+
+  for (let cardCount = 0; cardCount < 7; cardCount++) {
+    for (let player of players) {
+      if (deck.length > 0) {
+        const card = deck.shift();
+
+        if (
+          player.name === document.getElementById("playerName").value.trim()
+        ) {
+          player.hand.push(card);
+          playerCardsContainer.appendChild(card); // Add the card to the player's cards container
+        } else {
+          const backCardEl = createBackCardElement();
+          player.hand.push(backCardEl);
+          // Handling for opponent's cards...
+        }
+      }
+    }
+  }
+
+  const cardsContainer = document.getElementById("cards-container");
+  cardsContainer.appendChild(playerCardsContainer); // Append to the specific game area
+};
+
+// Function to create an element for the back of a card
+const createBackCardElement = () => {
+  const img = document.createElement("img");
+  img.src = "./assets/uno.svg"; // Path to the back of the card image
+  img.alt = "Card Back";
+  // Set any additional attributes, styles, or classes as needed
+  return img;
+};
+
 //#endregion
