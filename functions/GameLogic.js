@@ -159,8 +159,12 @@ const startGame = () => {
   // Close the modal after selection
   document.getElementById("opponentSelectDialog").style.display = "none";
   initializePlayers(opponentCount, playerName);
+  var playerNameDisplay = document.getElementById("playerNameDisplay");
+  playerNameDisplay.innerHTML = playerName;
+  playerNameDisplay.style.display = "block";
   shuffleDeck();
   dealCards();
+  flipInitialCard();
 };
 
 // Function to initialize players
@@ -205,5 +209,27 @@ const createBackCardElement = () => {
   // Set any additional attributes, styles, or classes as needed
   return img;
 };
+
+const flipInitialCard = () => {
+  if (deck.length > 0) {
+    const flippedCard = deck.shift();
+    const flippedCardElement = document.getElementById("discarded-card");
+    flippedCardElement.replaceWith(flippedCard); // Replace the canvas with the actual card
+  }
+};
+
+// Function to draw a card from the pile
+const drawCard = () => {
+  if (deck.length > 0) {
+    const card = deck.shift();
+    const playerHand = players[0].hand; // Assuming players[0] is the human player
+    playerHand.push(card);
+    const playerCardsContainer = document.getElementById("player-cards");
+    playerCardsContainer.appendChild(card);
+  }
+};
+
+// Add this event listener to the card pile image
+document.getElementById("card-pile").addEventListener("click", drawCard);
 
 //#endregion

@@ -26,11 +26,16 @@
  <!-- This is the main container for the game, it will house all the cards, but we can
         always add more to it, this is just a placeholder for now -->
         <div id="cards-container" class="cards-container">
+
+          <div class="discard-pile-container">
+            <canvas id="discarded-card"></canvas>
+          </div>
+
           <img id="card-pile" src="./assets/uno.svg" alt="Card Pile" />
         
           <div class="player-area">
-            <div id="player-cards" class="player-cards"></div>
             <div id="playerNameDisplay" class="player-name"></div>
+            <div id="player-cards" class="player-cards"></div>
           </div>
         </div>
   <div>

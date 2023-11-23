@@ -20,15 +20,27 @@
 }
 
 #card-pile {
-  margin-left: 5rem; /* Adjust as needed for your layout */
+  position: absolute;
+  top: 50%;
+  left: 55%;
+  transform: translateY(-50%);
+  width: 73px;
+  height: 110px;
+  transition: transform 0.2s; /* Smooth transition for the transform */
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* Optional: Adds shadow for depth */
 }
+
+#card-pile:hover {
+  transform: translateY(-60%); /* Move up on hover */
+}
+
 
 
 /* Main container for the card table */
 .cards-container {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Aligns children at top and bottom */
+  justify-content: space-between;
   align-items: center;
   margin: 0 auto;
   height: 75vh;
@@ -37,12 +49,7 @@
   background-color: rgb(24, 94, 24);
   border: 3.1rem solid #493c03;
   border-radius: 20rem;
-
-  #card-pile {
-    margin-left: 5rem; /* Adjust as needed for your layout */
-    width: 73px;
-    height: 110px;
-  }
+  position: relative;
 }
 
 .player-cards {
@@ -53,6 +60,7 @@
 .player-cards canvas {
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s;
+  margin: 2px;
 }
 
 .player-cards canvas:hover {
@@ -67,6 +75,17 @@
   padding: 10px;
   font-size: 20px;
   width: auto;
+  background-color: slategray;
+  position: absolute;
+  top: 98%;
+}
+
+.player-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; /* Adjust as needed */
+  margin-top: auto;
 }
 
 
@@ -122,4 +141,12 @@
   text-decoration: none;
   cursor: pointer;
 }
+
+.discard-pile-container {
+  position: absolute;
+  left: calc(55% - 80px); /* Adjust as per your layout */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 
