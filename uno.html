@@ -28,16 +28,15 @@
  <!-- This is the main container for the game, it will house all the cards, but we can
         always add more to it, this is just a placeholder for now -->
         <div id="cards-container" class="cards-container">
-          <div id="human-player-cards" class="player-cards"></div>
-          <div id="opponent-cards" class="opponent-cards"></div>
+          <div id="card-deck"></div>
+
         </div>
         
 
   <div>
     <div id="playerNameDisplay" class="player-name"></div>
     <div class="player-button-container">
-      <button onclick="generateNumCards('blue', 5, true)">Create Card</button>
-      <button onclick="generateSpecialCard('blue', '+2', true)">Create Special Card</button>
+      <button id="shuffle-deal">Shuffle and Deal</button>
       </div>
   </div>
 

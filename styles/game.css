@@ -5,6 +5,21 @@
   background-image: url('../assets/Crystal_BG.png');
 }
 
+#card-deck {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#card-deck canvas {
+  margin: 5px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+#card-deck canvas:hover {
+  transform: translateY(-10px);
+}
+
 /* Main container for the card table */
 .cards-container {
   /* display: flex;
@@ -22,105 +37,8 @@
   .player-cards {
     display: block;
   }
-
-
 }
 
-/* Base style for the UNO card */
-.uno-card {
-  width: 116px;
-  height: 150px;
-  border-radius: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  color: white;
-  box-shadow: 0.4rem 0.2rem 1rem rgba(0, 0, 0, 0.4);
-  position: relative;
-  color: white;
-  margin: 0.5rem;
-}
-
-/* Colors */
-.uno-card.red {
-  background-color: #FF5555;
-  color: #FF5555; /* Set the color for red card */
-  border: 2px solid #fff; /* Add a white border to red cards */
-}
-
-.uno-card.yellow {
-  background-color: #FFD800;
-  color: #FFD800; /* Set the color for yellow card */
-  border: 2px solid #fff; /* Add a white border to yellow cards */
-}
-
-.uno-card.green {
-  background-color: #008744;
-  color: #008744; /* Set the color for green card */
-  border: 2px solid #fff; /* Add a white border to green cards */
-}
-
-.uno-card.blue {
-  background-color: #0057e7;
-  color: #0057e7; /* Set the color for blue card */
-  border: 2px solid #fff; /* Add a white border to blue cards */
-}
-
-/* Special cards */
-.uno-card.wild {
-  background-color: #000;
-  color: #000; /* Set the color for wild card */
-  border: 2px solid #fff; /* Add a white border to wild cards */
-  font-size: 0.5rem;
-}
-
-/* White slanted oval stretching from near the top right to top left */
-.uno-card .circle {
-  width: 95px;          /* Adjusted to make the shape an oval */
-  height: 60px;          /* Adjusted to make the shape an oval */
-  background-color: white;
-  border-radius: 50%;
-  transform: rotate(-20deg); /* Fine-tuned the rotation for desired slant */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  top: 50%;              /* Adjusted to start near the top of the card */
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-40deg);
-  z-index: 0; /* Behind the number */
-}
-
-/* Number in the middle of the card */
-.uno-card .number {
-  z-index: 2;
-  font-size: 1.4rem;
-  position: relative; /* Added to ensure z-index works correctly */
-  color: inherit; /* Inherit color from parent .uno-card */
-}
-
-/* Small number on top-left corner */
-.uno-card .top-left {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  color: white;
-  font-size: 1.4rem;
-  z-index: 1;
-}
-
-/* Small number on bottom-right corner */
-.uno-card .bottom-right {
-  position: absolute;
-  bottom: 10px;
-  color: white;
-  right: 10px;
-  font-size: 1.4rem;
-  z-index: 1;
-  transform: rotate(180deg);
-}
 
 /* Holds all of the buttons the player can use while playing */
 .player-button-container {
@@ -187,40 +105,5 @@
   font-size: 20px;
   margin: 5px 0 5px 0px;
   display: none; /* Initially hide the container */
-}
-
-
-.player-cards, .opponent-cards {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px; /* Space between player and opponent cards */
-}
-
-.player-cards {
-  /* Additional styling specifically for the human player's cards */
-}
-
-.opponent-card {
-  width: 60px; /* Adjust as needed */
-  height: 100px; /* Adjust as needed */
-  background-color: #0073e6; /* A typical blue, adjust as per your preference */
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px; /* Gives the card rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: adds some depth */
-  margin: 5px; /* Spacing between cards */
-  backface-visibility: hidden; /* Ensures only the "back" is visible */
-}
-
-.opponent-card::before {
-  content: ""; /* Add a pattern or symbol here if desired */
-  display: block;
-  width: 80%; /* Relative to the card size */
-  height: 80%; /* Relative to the card size */
-  background: #fff; /* White */
 }
 

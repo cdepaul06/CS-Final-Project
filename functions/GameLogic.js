@@ -1,120 +1,113 @@
 //#region Card Generation
 
-const colors = ["red", "yellow", "green", "blue"];
-const values = [
-  "0",
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "Skip",
-  "Reverse",
-  "+2",
-];
-const specialValues = ["Wild", "Wild Draw Four"]; // These don't have a color
-
-// This function can be used to create a single card or even a full deck of cards if we pass an array of numbers
-const generateNumCards = (cardColor, cardNumber, isHuman = true) => {
-  const parentElement = isHuman
-    ? document.getElementById("human-player-cards")
-    : document.getElementById("opponent-cards");
-
-  // Create card structure
-  const cardElement = document.createElement("div");
-  cardElement.classList.add("uno-card", cardColor);
-
-  const topLeft = document.createElement("div");
-  topLeft.classList.add("top-left");
-  topLeft.innerText = cardNumber;
-
-  const circle = document.createElement("div");
-  circle.classList.add("circle");
-
-  const number = document.createElement("div");
-  number.classList.add("number");
-  number.innerText = cardNumber;
-
-  const bottomRight = document.createElement("div");
-  bottomRight.classList.add("bottom-right");
-  bottomRight.innerText = cardNumber;
-
-  // Append all parts to the card
-  cardElement.appendChild(topLeft);
-  cardElement.appendChild(circle);
-  cardElement.appendChild(number);
-  cardElement.appendChild(bottomRight);
-
-  // Append the card to the parent element
-  parentElement.appendChild(cardElement);
+const cardColor = (num) => {
+  let color;
+  if (num % 14 === 13) {
+    return "black";
+  }
+  switch (Math.floor(num / 14)) {
+    case 0:
+    case 4:
+      color = "red";
+      break;
+    case 1:
+    case 5:
+      color = "yellow";
+      break;
+    case 2:
+    case 6:
+      color = "green";
+      break;
+    case 3:
+    case 7:
+      color = "blue";
+      break;
+  }
+  return color;
 };
 
-const generateSpecialCard = (cardColor, cardNumber, isHuman = true) => {
-  const parentElement = isHuman
-    ? document.getElementById("human-player-cards")
-    : document.getElementById("opponent-cards");
-
-  // Create card structure
-  const cardElement = document.createElement("div");
-  cardElement.classList.add("uno-card", cardColor);
-
-  const topLeft = document.createElement("div");
-  topLeft.classList.add("top-left");
-  topLeft.innerText = cardNumber;
-
-  const circle = document.createElement("div");
-  circle.classList.add("circle");
-
-  const number = document.createElement("div");
-  number.classList.add("number");
-  number.innerText = cardNumber;
-
-  const bottomRight = document.createElement("div");
-  bottomRight.classList.add("bottom-right");
-  bottomRight.innerText = cardNumber;
-
-  // Append all parts to the card
-  cardElement.appendChild(topLeft);
-  cardElement.appendChild(circle);
-  cardElement.appendChild(number);
-  cardElement.appendChild(bottomRight);
-
-  // Append the card to the parent element
-  parentElement.appendChild(cardElement);
-};
-
-const getRandomElement = (array) =>
-  array[Math.floor(Math.random() * array.length)];
-
-const dealCards = (numPlayers, cardsPerPlayer) => {
-  for (let i = 0; i < numPlayers; i++) {
-    const isHuman = i === 0; // Assuming the first player is human
-
-    for (let j = 0; j < cardsPerPlayer; j++) {
-      const isSpecial = Math.random() < 0.2; // Assuming 20% chance for a special card
-
-      if (isSpecial) {
-        // For special cards (Wild and Wild Draw Four)
-        const cardValue = getRandomElement(specialValues);
-        generateSpecialCard("black", cardValue, isHuman);
+const cardType = (num) => {
+  switch (num % 14) {
+    case 10: //Skip
+      return "Skip";
+    case 11: //Reverse
+      return "Reverse";
+    case 12: //Draw 2
+      return "Draw2";
+    case 13: //Wild or Wild Draw 4
+      if (Math.floor(num / 14) >= 4) {
+        return "Draw4";
       } else {
-        // For regular cards
-        const cardColor = getRandomElement(colors);
-        const cardValue = getRandomElement(values);
-        generateNumCards(cardColor, cardValue, isHuman);
+        return "Wild";
       }
+    default:
+      return "Number " + (num % 14);
+  }
+};
 
-      // If it's not a human player, you might want to hide the card's face
-      // This logic will depend on how you've structured your card generation functions
-      // and how you're handling the display of cards for computer players.
+const cardDeckEl = document.getElementById("card-deck");
+const shuffleDealButton = document.getElementById("shuffle-deal");
+
+const cardWidth = 73;
+const cardHeight = 110;
+
+// Function to create a canvas with a specific card drawn on it
+const createCardElement = (cardImage, x, y) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = cardWidth;
+  canvas.height = cardHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(
+    cardImage,
+    x,
+    y,
+    cardWidth,
+    cardHeight,
+    0,
+    0,
+    cardWidth,
+    cardHeight
+  );
+  return canvas;
+};
+
+// Load the image
+const cardImage = new Image();
+cardImage.src = "./assets/deck.svg";
+
+// Create the deck (this is a simplified version)
+const deck = [];
+cardImage.onload = () => {
+  let num = 0; // Start with card number 0
+  for (let y = 0; y < cardImage.height; y += cardHeight) {
+    for (let x = 0; x < cardImage.width; x += cardWidth) {
+      const cardEl = createCardElement(cardImage, x + 1, y - 1); // Adjust for SVG padding, this ensures cards are spaced correctly
+      cardEl.dataset.color = cardColor(num);
+      cardEl.dataset.type = cardType(num);
+      deck.push(cardEl);
+      cardDeckEl.appendChild(cardEl);
+      num++; // Increment card number for next card
     }
   }
 };
 
+// Shuffle the deck
+const shuffleDeck = () => {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  // Update the DOM
+  cardDeckEl.innerHTML = "";
+  deck.forEach((cardEl) => {
+    cardDeckEl.appendChild(cardEl);
+    console.log(
+      `Card Color: ${cardEl.dataset.color}, Card Type: ${cardEl.dataset.type}`
+    );
+  });
+};
+
+shuffleDealButton.addEventListener("click", shuffleDeck);
 //#endregion
 
 //#region Modal Logic
@@ -157,10 +150,6 @@ const startGame = () => {
       " opponents"
   );
   // Additional game initialization logic
-
-  // Dealing cards
-  const totalPlayers = parseInt(opponentCount, 10) + 1; // +1 for the human player
-  dealCards(totalPlayers, 7);
 
   // Close the modal after selection
   document.getElementById("opponentSelectDialog").style.display = "none";
