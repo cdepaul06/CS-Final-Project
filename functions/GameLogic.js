@@ -1,125 +1,235 @@
-//global  variables
-let deck = [
-  {
-    color: null,
-    number: null,
-  },
-];
+//#region Global Variables
+var players = []; // Array to hold each player's hand
+var deck = []; // Array to hold the deck of cards
+const shuffleDealButton = document.getElementById("shuffle-deal");
+const cardWidth = 73;
+const cardHeight = 110;
 
-const generateDeck = (colors, numbers) => {
-  for (let i = 0; i < colors.length; i++) {
-    for (let j = 0; j < numbers.length; j++) {
-      deck.push({
-        color: colors[i],
-        number: numbers[j],
-      });
-    }
+//#endregion
+
+//#region Card Generation
+
+const cardColor = (num) => {
+  let color;
+  if (num % 14 === 13) {
+    return "black";
+  }
+  switch (Math.floor(num / 14)) {
+    case 0:
+    case 4:
+      color = "red";
+      break;
+    case 1:
+    case 5:
+      color = "yellow";
+      break;
+    case 2:
+    case 6:
+      color = "green";
+      break;
+    case 3:
+    case 7:
+      color = "blue";
+      break;
+  }
+  return color;
+};
+
+const cardType = (num) => {
+  switch (num % 14) {
+    case 10: //Skip
+      return "Skip";
+    case 11: //Reverse
+      return "Reverse";
+    case 12: //Draw 2
+      return "Draw2";
+    case 13: //Wild or Wild Draw 4
+      if (Math.floor(num / 14) >= 4) {
+        return "Draw4";
+      } else {
+        return "Wild";
+      }
+    default:
+      return "Number " + (num % 14);
   }
 };
 
-generateDeck(
-  ["red", "blue", "green", "yellow"],
-  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-);
+// Load the image
+const cardImage = new Image();
+cardImage.src = "./assets/deck.svg";
 
-let players = [
-  {
-    name: "",
-    hand: [],
-  },
-];
-let currentPlayer = 0;
-let direction = 1;
-let currentCardColor = "";
-let currentCardNumber = 0;
-let isWildCard = false;
-let wildCardColor = "";
-
-// This function can be used to create a single card or even a full deck of cards if we pass an array of numbers
-const generateNumCards = (cardColor, cardNumber) => {
-  const parentElement = document.getElementById("cards-container");
-
-  // Create card structure
-  const cardElement = document.createElement("div");
-  cardElement.classList.add("uno-card", cardColor);
-
-  const topLeft = document.createElement("div");
-  topLeft.classList.add("top-left");
-  topLeft.innerText = cardNumber;
-
-  const circle = document.createElement("div");
-  circle.classList.add("circle");
-
-  const number = document.createElement("div");
-  number.classList.add("number");
-  number.innerText = cardNumber;
-
-  const bottomRight = document.createElement("div");
-  bottomRight.classList.add("bottom-right");
-  bottomRight.innerText = cardNumber;
-
-  // Append all parts to the card
-  cardElement.appendChild(topLeft);
-  cardElement.appendChild(circle);
-  cardElement.appendChild(number);
-  cardElement.appendChild(bottomRight);
-
-  // Append the card to the parent element
-  parentElement.appendChild(cardElement);
+// Create the deck (this is a simplified version)
+cardImage.onload = () => {
+  let num = 0;
+  for (let y = 0; y < 8 * cardHeight; y += cardHeight) {
+    for (let x = 0, count = 0; count < 14; x += cardWidth, count++) {
+      // Skip the first card in rows 5-8
+      if (y >= 4 * cardHeight && count === 0) {
+        num++;
+        continue;
+      }
+      const cardEl = createCardElement(cardImage, x + 1, y - 1);
+      cardEl.dataset.color = cardColor(num);
+      cardEl.dataset.type = cardType(num);
+      deck.push(cardEl);
+      // Do not append to cardDeckEl here
+      num++;
+    }
+  }
+  // Optionally, show the number of cards in the deck
+  console.log("Deck initialized with " + deck.length + " cards.");
 };
 
-const generatespecialCard = (cardColor, cardNumber = "Wild") => {
-  const parentElement = document.getElementById("cards-container");
+// Function to create a canvas with a specific card drawn on it
+const createCardElement = (cardImage, x, y) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = cardWidth;
+  canvas.height = cardHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(
+    cardImage,
+    x,
+    y,
+    cardWidth,
+    cardHeight,
+    0,
+    0,
+    cardWidth,
+    cardHeight
+  );
+  return canvas;
+};
+const cardPile = document.getElementById("card-pile");
+const cardDeckEl = document.getElementById("card-deck");
 
-  // Create card structure
-  const cardElement = document.createElement("div");
-  cardElement.classList.add("uno-card", cardColor);
-
-  const topLeft = document.createElement("div");
-  topLeft.classList.add("top-left");
-  topLeft.innerText = cardNumber;
-
-  const circle = document.createElement("div");
-  circle.classList.add("circle");
-
-  const number = document.createElement("div");
-  number.classList.add("number");
-  number.innerText = cardNumber;
-
-  const bottomRight = document.createElement("div");
-  bottomRight.classList.add("bottom-right");
-  bottomRight.innerText = cardNumber;
-
-  // Append all parts to the card
-  cardElement.appendChild(topLeft);
-  cardElement.appendChild(circle);
-  cardElement.appendChild(number);
-  cardElement.appendChild(bottomRight);
-
-  // Append the card to the parent element
-  parentElement.appendChild(cardElement);
+// Shuffle the deck
+const shuffleDeck = () => {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  // Do not append cards to the DOM here
+  console.log("Deck shuffled.");
 };
 
-// function to get a random card from the deck
-const getRandomCard = () => {
-  // get a random number between 0 and the length of the deck
-  const randomCard = Math.floor(Math.random() * deck.length);
-  // return the random card
-  return randomCard;
+shuffleDealButton.addEventListener("click", shuffleDeck);
+//#endregion
+
+//#region Modal Logic
+// When the page loads, show the modal
+window.onload = function () {
+  var modal = document.getElementById("opponentSelectDialog");
+  modal.style.display = "block";
+
+  // Get the <span> element that closes the modal
+  var span = document.getElementsByClassName("close")[0];
+
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function () {
+    modal.style.display = "none";
+  };
+};
+//#endregion
+
+//#region Game Logic
+// Function to start the game with the selected number of opponents and player name
+const startGame = () => {
+  var playerName = document.getElementById("playerName").value.trim();
+  var opponentCount = document.getElementById("opponentCount").value;
+
+  if (!playerName) {
+    alert("Please enter your name.");
+    return;
+  }
+
+  // Set the player's name in the playerNameDisplay div
+  var playerNameDisplay = document.getElementById("playerNameDisplay");
+  playerNameDisplay.innerHTML = "&nbsp;Player: " + playerName;
+  playerNameDisplay.style.display = "block"; // Make the container visible
+
+  console.log(
+    "Player Name: " +
+      playerName +
+      ", Starting game with " +
+      opponentCount +
+      " opponents"
+  );
+  // Additional game initialization logic
+
+  // Close the modal after selection
+  document.getElementById("opponentSelectDialog").style.display = "none";
+  initializePlayers(opponentCount, playerName);
+  var playerNameDisplay = document.getElementById("playerNameDisplay");
+  playerNameDisplay.innerHTML = playerName;
+  playerNameDisplay.style.display = "block";
+  shuffleDeck();
+  dealCards();
+  flipInitialCard();
 };
 
-// function to deal the cards to the players
+// Function to initialize players
+const initializePlayers = (opponentCount, playerName) => {
+  for (let i = 0; i <= opponentCount; i++) {
+    players.push({ name: i === 0 ? playerName : `Opponent ${i}`, hand: [] });
+  }
+};
+
+// Function to deal cards
 const dealCards = () => {
-  // loop through the players
-  for (let i = 0; i < players.length; i++) {
-    // loop through the cards
-    for (let j = 0; j < 7; j++) {
-      // get a random card
-      const randomCard = getRandomCard();
-      // push the card to the player's hand
-      players[i].hand.push(randomCard);
-      // remove the card from the deck
-      deck.splice(randomCard, 1);
+  const playerCardsContainer = document.getElementById("player-cards");
+
+  for (let cardCount = 0; cardCount < 7; cardCount++) {
+    for (let player of players) {
+      if (deck.length > 0) {
+        const card = deck.shift();
+
+        if (
+          player.name === document.getElementById("playerName").value.trim()
+        ) {
+          player.hand.push(card);
+          playerCardsContainer.appendChild(card); // Add the card to the player's cards container
+        } else {
+          const backCardEl = createBackCardElement();
+          player.hand.push(backCardEl);
+          // Handling for opponent's cards...
+        }
+      }
     }
   }
+
+  const cardsContainer = document.getElementById("cards-container");
+  cardsContainer.appendChild(playerCardsContainer); // Append to the specific game area
 };
+
+// Function to create an element for the back of a card
+const createBackCardElement = () => {
+  const img = document.createElement("img");
+  img.src = "./assets/uno.svg"; // Path to the back of the card image
+  img.alt = "Card Back";
+  // Set any additional attributes, styles, or classes as needed
+  return img;
+};
+
+const flipInitialCard = () => {
+  if (deck.length > 0) {
+    const flippedCard = deck.shift();
+    const flippedCardElement = document.getElementById("discarded-card");
+    flippedCardElement.replaceWith(flippedCard); // Replace the canvas with the actual card
+  }
+};
+
+// Function to draw a card from the pile
+const drawCard = () => {
+  if (deck.length > 0) {
+    const card = deck.shift();
+    const playerHand = players[0].hand; // Assuming players[0] is the human player
+    playerHand.push(card);
+    const playerCardsContainer = document.getElementById("player-cards");
+    playerCardsContainer.appendChild(card);
+  }
+};
+
+// Add this event listener to the card pile image
+document.getElementById("card-pile").addEventListener("click", drawCard);
+
+//#endregion

@@ -5,18 +5,44 @@
     <link rel="stylesheet" type="text/css" href="styles/game.css" />
     <meta charset="utf-8" />
   </head>
-   
+
+<!-- Dialog for selecting number of opponents and entering player name -->
+<div id="opponentSelectDialog" class="modal" style="display:none;">
+  <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Welcome to UNO!</h2>
+      <p>Enter your name:</p>
+      <input type="text" id="playerName" placeholder="Your Name">
+      <p>Select Number of Opponents:</p>
+      <select id="opponentCount">
+          <option value="1">1 Opponent</option>
+          <option value="2">2 Opponents</option>
+          <option value="3">3 Opponents</option>
+      </select>
+      <button onclick="startGame()">Start Game</button>
+  </div>
+</div>
+
  <!-- This is the main container for the game, it will house all the cards, but we can
         always add more to it, this is just a placeholder for now -->
-  <div id="cards-container" class="cards-container">
+        <div id="cards-container" class="cards-container">
+
+          <div class="discard-pile-container">
+            <canvas id="discarded-card"></canvas>
+          </div>
+
+          <img id="card-pile" src="./assets/uno.svg" alt="Card Pile" />
+        
+          <div class="player-area">
+            <div id="playerNameDisplay" class="player-name"></div>
+            <div id="player-cards" class="player-cards"></div>
+          </div>
+        </div>
+  <div>
+    <div class="player-button-container">
+      <button id="shuffle-deal">Shuffle and Deal</button>
+      </div>
   </div>
-
-
-  <div class="player-button-container">
-  <button onclick="generateNumCards('blue', 5)">Create Card</button>
-  <button onclick="generatespecialCard('wild', '+2', null)">Create Special Card</button>
-  </div>
-
     <script type="text/javascript" src="functions/GameLogic.js"></script>
   </body>
 </html>
