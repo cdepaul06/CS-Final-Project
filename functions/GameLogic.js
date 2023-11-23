@@ -1,6 +1,7 @@
 //#region Global Variables
 var players = []; // Array to hold each player's hand
 var deck = []; // Array to hold the deck of cards
+var discardPile = []; // Array to hold the discard pile
 const shuffleDealButton = document.getElementById("shuffle-deal");
 const cardWidth = 73;
 const cardHeight = 110;
@@ -164,7 +165,7 @@ const startGame = () => {
   playerNameDisplay.style.display = "block";
   shuffleDeck();
   dealCards();
-  flipInitialCard();
+  initializeDiscardPile();
 };
 
 // Function to initialize players
@@ -210,15 +211,16 @@ const createBackCardElement = () => {
   return img;
 };
 
-const flipInitialCard = () => {
+const initializeDiscardPile = () => {
   if (deck.length > 0) {
-    const flippedCard = deck.shift();
+    const discardedCard = deck.shift();
     const flippedCardElement = document.getElementById("discarded-card");
-    flippedCardElement.replaceWith(flippedCard); // Replace the canvas with the actual card
+    flippedCardElement.replaceWith(discardedCard); // Replace the canvas with the actual card
+    discardPile.push(discardedCard);
   }
 };
 
-// Function to draw a card from the pile
+// Function to draw a card from the pile of cards
 const drawCard = () => {
   if (deck.length > 0) {
     const card = deck.shift();
@@ -231,5 +233,50 @@ const drawCard = () => {
 
 // Add this event listener to the card pile image
 document.getElementById("card-pile").addEventListener("click", drawCard);
+
+const playCard = (playerIndex, cardIndex) => {
+  const player = players[playerIndex];
+  const card = player.hand[cardIndex];
+
+  // Check if the card can be legally played
+  if (canPlayCard(card)) {
+    // Remove the card from the player's hand
+    player.hand.splice(cardIndex, 1);
+
+    // Apply the card's effect
+    applyCardEffect(card);
+
+    // Add the card to the discard pile
+    discardPile.push(card);
+
+    // Proceed to the next player's turn
+    nextTurn();
+
+    // Optional: Check for game end condition
+    checkForGameEnd();
+  } else {
+    console.log("Cannot play this card.");
+  }
+};
+
+const canPlayCard = (card) => {
+  const topCard = discardPile[discardPile.length - 1];
+  // Implement logic to check if the card can be played
+  return true; // Placeholder, implement actual logic
+};
+
+const applyCardEffect = (card) => {
+  // Implement logic based on the card type
+  // For example, handle skips, reverses, draw twos, etc.
+};
+
+const nextTurn = () => {
+  // Implement logic to determine the next player
+  // Consider the current direction of play and any special card effects
+};
+
+const checkForGameEnd = () => {
+  // Implement logic to check if any player has won
+};
 
 //#endregion
