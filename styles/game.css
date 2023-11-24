@@ -92,6 +92,7 @@
 
 .opponent-1-cards canvas {
   margin: 2px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* Optional: Adds shadow for depth */
 }
 
 .opponent-1-name {
@@ -137,6 +138,7 @@
 
 .opponent-2-cards canvas {
   margin: 2px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* Optional: Adds shadow for depth */
 }
 
 /* Opponent 3 - Cards on the right */
@@ -168,6 +170,7 @@
 
 .opponent-3-cards canvas {
   margin: 2px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* Optional: Adds shadow for depth */
 }
 
 /* Holds all of the buttons the player can use while playing */
