@@ -34,8 +34,6 @@
   transform: translateY(-60%); /* Move up on hover */
 }
 
-
-
 /* Main container for the card table */
 .cards-container {
   display: flex;
@@ -43,6 +41,7 @@
   justify-content: space-between;
   align-items: center;
   margin: 0 auto;
+  margin-top: 3rem;
   height: 75vh;
   width: 75vw;
   padding: 20px;
@@ -54,7 +53,6 @@
 
 .player-cards {
   display: flex;
-  margin: 5px;
 }
 
 .player-cards canvas {
@@ -88,6 +86,92 @@
   margin-top: auto;
 }
 
+.opponent-1-cards {
+  transform: rotate(-180deg);
+}
+
+.opponent-1-cards canvas {
+  margin: 2px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* Optional: Adds shadow for depth */
+}
+
+.opponent-1-name {
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 30px;
+  padding: 10px;
+  font-size: 20px;
+  background-color: slategray;
+  position: absolute;
+  top: -5%; /* Adjust as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center; /* Center the text */
+}
+
+/* Opponent 2 - Cards on the left */
+.opponent-2-area {
+  position: absolute;
+  left: -5%; 
+  top: 50%;
+  transform: translateY(-50%) rotate(-270deg);
+}
+
+/* Opponent 2 Name Display */
+.opponent-2-name {
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 30px;
+  padding: 10px;
+  font-size: 20px;
+  background-color: slategray;
+  position: absolute;
+  left: 35%; /* Adjust as needed */
+  top: 170%;
+  text-align: center; /* Center the text */
+  width: auto; /* Adjust width to fit the text */
+}
+
+.opponent-2-cards {
+  display: flex;
+}
+
+.opponent-2-cards canvas {
+  margin: 2px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* Optional: Adds shadow for depth */
+}
+
+/* Opponent 3 - Cards on the right */
+.opponent-3-area {
+  position: absolute;
+  right: -5%;
+  top: 50%;
+  transform: translateY(-50%) rotate(270deg); 
+}
+
+/* Opponent 3 Name Display */
+.opponent-3-name {
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 30px;
+  padding: 10px;
+  font-size: 20px;
+  background-color: slategray;
+  position: absolute;
+  right: 35%; /* Adjust as needed */
+  top: 170%;
+  text-align: center; /* Center the text */
+  width: auto; /* Adjust width to fit the text */
+}
+
+.opponent-3-cards {
+  display: flex;
+}
+
+.opponent-3-cards canvas {
+  margin: 2px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* Optional: Adds shadow for depth */
+}
 
 /* Holds all of the buttons the player can use while playing */
 .player-button-container {
@@ -148,5 +232,14 @@
   top: 50%;
   transform: translateY(-50%);
 }
+
+/* Hide Opponent Names Initially */
+.player-name,
+.opponent-1-name,
+.opponent-2-name,
+.opponent-3-name {
+  display: none;
+}
+
 
 
