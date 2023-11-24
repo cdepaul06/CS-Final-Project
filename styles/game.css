@@ -41,6 +41,7 @@
   justify-content: space-between;
   align-items: center;
   margin: 0 auto;
+  margin-top: 3rem;
   height: 75vh;
   width: 75vw;
   padding: 20px;
@@ -52,7 +53,6 @@
 
 .player-cards {
   display: flex;
-  margin: 5px;
 }
 
 .player-cards canvas {
@@ -84,6 +84,14 @@
   align-items: center;
   width: 100%; /* Adjust as needed */
   margin-top: auto;
+}
+
+.opponent-1-cards {
+  transform: rotate(-180deg);
+}
+
+.opponent-1-cards canvas {
+  margin: 2px;
 }
 
 .opponent-1-name {
@@ -127,7 +135,7 @@
   display: flex;
 }
 
-.opponent-2-cards img {
+.opponent-2-cards canvas {
   margin: 2px;
 }
 
@@ -158,7 +166,7 @@
   display: flex;
 }
 
-.opponent-3-cards img {
+.opponent-3-cards canvas {
   margin: 2px;
 }
 

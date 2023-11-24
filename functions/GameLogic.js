@@ -4,8 +4,7 @@ var deck = []; // Array to hold the deck of cards
 var discardPile = []; // Array to hold the discard pile
 var currentColorInPlay = ""; // Variable to hold the current color in play
 var maxDrawCount = 0; // Variable to hold the max number of cards to draw
-var currentPlayer = 0; // Variable to hold the current player
-const shuffleDealButton = document.getElementById("shuffle-deal");
+var currentPlayer = null; // Variable to hold the current player
 const cardWidth = 73;
 const cardHeight = 110;
 
@@ -106,6 +105,26 @@ const createCardElement = (cardImage, x, y) => {
 const cardPile = document.getElementById("card-pile");
 const cardDeckEl = document.getElementById("card-deck");
 
+// Function to create a canvas element for the back of a card
+const createBackCardElement = (color, type) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = cardWidth;
+  canvas.height = cardHeight;
+  const ctx = canvas.getContext("2d");
+
+  const backCardImage = new Image();
+  backCardImage.src = "./assets/uno.svg"; // Path to the back of the card image
+  backCardImage.onload = () => {
+    ctx.drawImage(backCardImage, 0, 0, cardWidth, cardHeight);
+  };
+
+  // Store the actual card information in the dataset
+  canvas.dataset.color = color;
+  canvas.dataset.type = type;
+
+  return canvas;
+};
+
 // Shuffle the deck
 const shuffleDeck = () => {
   for (let i = deck.length - 1; i > 0; i--) {
@@ -116,7 +135,6 @@ const shuffleDeck = () => {
   console.log("Deck shuffled.");
 };
 
-shuffleDealButton.addEventListener("click", shuffleDeck);
 //#endregion
 
 //#region Modal Logic
@@ -142,9 +160,7 @@ const initializeDiscardPile = () => {
     flippedCard.id = "discarded-card";
     flippedCardElement.replaceWith(flippedCard); // Replace the canvas with the actual card
     discardPile.push(flippedCard);
-    console.log("discardPile", discardPile);
   }
-
   console.log("Discard pile initialized.");
 };
 
@@ -166,18 +182,11 @@ const startGame = () => {
     return;
   }
 
+  //* This will never evaluate to true, but just good practice to add the validation
   if (!opponentCount) {
     alert("Please select the number of opponents.");
     return;
   }
-
-  console.log(
-    "Player Name: " +
-      playerName +
-      ", Starting game with " +
-      opponentCount +
-      " opponents"
-  );
 
   // Display names of opponents based on the selected number
   if (opponentCount >= 1) {
@@ -202,18 +211,6 @@ const startGame = () => {
   initializeDiscardPile();
 };
 
-// Function to create an element for the back of a card
-const createBackCardElement = () => {
-  const img = document.createElement("img");
-  img.src = "./assets/uno.svg"; // Path to the back of the card image
-  img.alt = "Card Back";
-  img.style.width = "73px";
-  img.style.height = "110px";
-  img.style.margin = "2px";
-  // Set any additional attributes, styles, or classes as needed
-  return img;
-};
-
 // Function to deal cards
 const dealCards = () => {
   for (let cardCount = 0; cardCount < 7; cardCount++) {
@@ -230,8 +227,11 @@ const dealCards = () => {
           playerCardsContainer.appendChild(card); // Add the card to the player's cards container
         } else {
           // Dealing to opponents
-          const backCardEl = createBackCardElement();
-          player.hand.push(backCardEl);
+          const backCardCanvas = createBackCardElement(
+            card.dataset.color,
+            card.dataset.type
+          );
+          player.hand.push(backCardCanvas);
           // Determine the correct container for each opponent
           let opponentContainerId = "";
           switch (index) {
@@ -248,12 +248,14 @@ const dealCards = () => {
           const opponentContainer =
             document.getElementById(opponentContainerId);
           if (opponentContainer) {
-            opponentContainer.appendChild(backCardEl); // Add the back of the card to the opponent's container
+            opponentContainer.appendChild(backCardCanvas); // Add the back of the card canvas to the opponent's container
           }
         }
       }
     });
   }
+  console.log("Cards dealt.");
+  console.log(players);
 };
 
 // Function to draw a card from the pile
@@ -278,19 +280,16 @@ const isLegalPlay = (card) => {
   // Check if the played card matches the top card of the discard pile in color or type,
   // or if the played card is a Wild or Wild Draw 4 card.
   if (card.dataset.type === "Wild" || card.dataset.type === "Draw4") {
-    console.log(discardPile);
     players[0].hand.splice(players[0].hand.indexOf(card), 1);
     discardPile.push(card);
     return true; // Wild and Wild Draw 4 cards can be played on anything
   } else if (card.dataset.color === topDiscard.dataset.color) {
     players[0].hand.splice(players[0].hand.indexOf(card), 1);
     discardPile.push(card);
-    console.log(discardPile);
     return true; // Same color can always be played
   } else if (card.dataset.type === topDiscard.dataset.type) {
     players[0].hand.splice(players[0].hand.indexOf(card), 1);
     discardPile.push(card);
-    console.log(discardPile);
     return true; // Same type can always be played
   }
 
@@ -306,12 +305,13 @@ const playCard = (card) => {
       topCard.replaceWith(card);
       card.id = "discarded-card"; // Assigning the ID to the new card
     } else {
-      console.error("No top card found in the discard pile.");
-      // handle this error case
+      console.error("Something is broken!");
     }
   } else {
     alert("Illegal Play, please try again.");
   }
 };
+
+const handlePlayerTurn = () => {};
 
 //#endregion
