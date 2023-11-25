@@ -10,6 +10,11 @@ const cardHeight = 110;
 
 //#endregion
 
+//#region Sound Effects
+const cardHoverSound = document.getElementById('cardHoverSound');
+const cardPlaySound = document.getElementById('cardPlaySound');
+//#endregion
+
 //#region Card Generation
 
 const cardColor = (num) => {
@@ -99,7 +104,13 @@ const createCardElement = (cardImage, x, y) => {
     cardWidth,
     cardHeight
   );
-  canvas.onclick = () => playCard(canvas);
+    canvas.onclick = () => playCard(canvas);
+    canvas.onmouseover = () => {
+        if (cardHoverSound) {
+            cardHoverSound.currentTime = 0; // Reset playback position to the start
+            cardHoverSound.play(); // Play the sound when the mouse is over the card
+        }
+    };
   return canvas;
 };
 const cardPile = document.getElementById("card-pile");
