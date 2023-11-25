@@ -8,7 +8,7 @@ var maxDrawCount = 0; // Variable to hold the max number of cards to draw
 var drawnCount = 0; // Variable to hold the number of cards drawn
 var currentPlayer = {}; // Variable to hold the current player
 var turnCount = 1; // Variable to hold the current turn count
-var turnLog = []; // Array to hold the turn log// Variable to hold whether it is the player's turn
+var turnLogText = []; // Array to hold the turn log// Variable to hold whether it is the player's turn
 const cardWidth = 73;
 const cardHeight = 110;
 //#endregion
@@ -60,7 +60,7 @@ const cardType = (num) => {
 };
 
 // Function to create a canvas with a specific card drawn on it
-const createCardElement = (cardImage, x, y, discarded = false) => {
+const createCardElement = (cardImage, x, y) => {
   const canvas = document.createElement("canvas");
   canvas.width = cardWidth;
   canvas.height = cardHeight;
@@ -76,7 +76,7 @@ const createCardElement = (cardImage, x, y, discarded = false) => {
     cardWidth,
     cardHeight
   );
-  !discarded && (canvas.onclick = () => playCard(canvas));
+  canvas.onclick = () => playCard(canvas);
   return canvas;
 };
 
@@ -189,6 +189,7 @@ const initializeDiscardPile = () => {
     const flippedCard = deck.shift();
     const flippedCardElement = document.getElementById("discarded-card");
     flippedCard.id = "discarded-card";
+    flippedCard.onclick = null;
     flippedCardElement.replaceWith(flippedCard); // Replace the canvas with the actual card
     discardPile.push(flippedCard);
   }
@@ -239,6 +240,15 @@ const startGame = () => {
   shuffleDeck();
   dealCards();
   initializeDiscardPile();
+
+  console.log(discardPile);
+
+  currentPlayer = players[0];
+  turnLogText.push(`${currentPlayer.name}'s turn.`);
+  const gameLog = document.getElementById("game-log");
+  gameLog.innerHTML = turnLogText
+    .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
+    .join("");
   console.log("Game started.");
 };
 
@@ -274,42 +284,27 @@ const dealCards = () => {
   console.log("Players", players);
 };
 
-// function to change currentPlayer
-const changePlayer = () => {
-  if (currentPlayer.name === players[players.length - 1].name) {
-    currentPlayer = players[0];
-  } else {
-    currentPlayer = players[players.indexOf(currentPlayer) + 1];
-  }
-  drawnCount = 0;
-  turnCount++;
-  turnLog.push(`${currentPlayer.name}'s turn.`);
-  const gameLog = document.getElementById("game-log");
-  gameLog.innerHTML = turnLog
-    .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
-    .join("");
-};
-
 // Function to draw a card from the pile
 const drawCard = () => {
-  if (deck.length > 0 && allowDraw(maxDrawCount)) {
+  if (deck.length > 0) {
     const card = deck.shift();
     const playerHand = currentPlayer.hand;
     playerHand.push(card);
 
     const playerCardsContainer = document.getElementById("player-cards");
     playerCardsContainer.appendChild(card);
-
-    turnLog.push(
+    turnLogText.push(
       `${currentPlayer.name} drew a card. They now have ${currentPlayer.hand.length} cards.`
     );
     const gameLog = document.getElementById("game-log");
-    gameLog.innerHTML = turnLog
+    gameLog.innerHTML = turnLogText
       .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
       .join("");
+    changePlayer();
   }
 };
 
+// ! Come back to this idiot, you need to make sure it is splicing from the proper players hands
 // Logic to determine if legal play was made
 const isLegalPlay = (card) => {
   // Get the last card from the discard pile
@@ -320,14 +315,17 @@ const isLegalPlay = (card) => {
   if (card.dataset.type === "Wild" || card.dataset.type === "Draw4") {
     players[0].hand.splice(players[0].hand.indexOf(card), 1);
     discardPile.push(card);
+    console.log(discardPile);
     return true; // Wild and Wild Draw 4 cards can be played on anything
   } else if (card.dataset.color === topDiscard.dataset.color) {
     players[0].hand.splice(players[0].hand.indexOf(card), 1);
     discardPile.push(card);
+    console.log(discardPile);
     return true; // Same color can always be played
   } else if (card.dataset.type === topDiscard.dataset.type) {
     players[0].hand.splice(players[0].hand.indexOf(card), 1);
     discardPile.push(card);
+    console.log(discardPile);
     return true; // Same type can always be played
   }
 
@@ -341,12 +339,73 @@ const playCard = (card) => {
     const topCard = document.getElementById("discarded-card");
     if (topCard) {
       topCard.replaceWith(card);
+      console.log("players", players);
       card.id = "discarded-card"; // Assigning the ID to the new card
+      card.onclick = null; // Removing the onclick event from the new card
+      turnLogText.push(
+        `${currentPlayer.name} played a ${card.dataset.color} ${card.dataset.type}.`
+      );
+      const gameLog = document.getElementById("game-log");
+      gameLog.innerHTML = turnLogText
+        .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
+        .join("");
+      changePlayer();
+      if (currentPlayer.name !== players[0].name) {
+        startCPUPlay();
+      }
+      console.log("current player", currentPlayer);
     } else {
       console.error("Something is broken!");
     }
   } else {
     alert("Illegal Play, please try again.");
+  }
+};
+
+// function to change currentPlayer
+const changePlayer = () => {
+  if (currentPlayer.name === players[players.length - 1].name) {
+    currentPlayer = players[0];
+  } else {
+    currentPlayer = players[players.indexOf(currentPlayer) + 1];
+  }
+  drawnCount = 0;
+  turnCount++;
+  turnLogText.push(`${currentPlayer.name}'s turn.`);
+  const gameLog = document.getElementById("game-log");
+  gameLog.innerHTML = turnLogText
+    .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
+    .join("");
+};
+
+const startCPUPlay = () => {
+  if (currentPlayer.name !== players[0].name) {
+    cpuPlay();
+  }
+};
+
+// If the current player which is not human has a playable card, use the playCard function
+const cpuPlay = () => {
+  const topCard = document.getElementById("discarded-card");
+  const topCardColor = topCard.dataset.color;
+  const topCardType = topCard.dataset.type;
+
+  // Check if the current player has a playable card
+  const playableCard = currentPlayer.hand.find((card) => {
+    if (card.dataset.type === "Wild" || card.dataset.type === "Draw4") {
+      return true;
+    } else if (card.dataset.color === topCardColor) {
+      return true;
+    } else if (card.dataset.type === topCardType) {
+      return true;
+    }
+    return false;
+  });
+
+  if (playableCard) {
+    playCard(playableCard);
+  } else {
+    drawCard();
   }
 };
 
