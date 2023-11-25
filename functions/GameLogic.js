@@ -1,243 +1,317 @@
-//global  variables
-let deck = [
-  {
-    color: null,
-    number: null,
-  },
-];
+//#region Global Variables
+var players = []; // Array to hold each player's hand
+var deck = []; // Array to hold the deck of cards
+var discardPile = []; // Array to hold the discard pile
+var currentColorInPlay = ""; // Variable to hold the current color in play
+var maxDrawCount = 0; // Variable to hold the max number of cards to draw
+var currentPlayer = null; // Variable to hold the current player
+const cardWidth = 73;
+const cardHeight = 110;
 
-const generateDeck = (colors, numbers) => {
-  for (let i = 0; i < colors.length; i++) {
-    for (let j = 0; j < numbers.length; j++) {
-      deck.push({
-        color: colors[i],
-        number: numbers[j],
-      });
-    }
+//#endregion
+
+//#region Card Generation
+
+const cardColor = (num) => {
+  let color;
+  if (num % 14 === 13) {
+    return "black";
+  }
+  switch (Math.floor(num / 14)) {
+    case 0:
+    case 4:
+      color = "red";
+      break;
+    case 1:
+    case 5:
+      color = "yellow";
+      break;
+    case 2:
+    case 6:
+      color = "green";
+      break;
+    case 3:
+    case 7:
+      color = "blue";
+      break;
+  }
+  return color;
+};
+
+const cardType = (num) => {
+  switch (num % 14) {
+    case 10: //Skip
+      return "Skip";
+    case 11: //Reverse
+      return "Reverse";
+    case 12: //Draw 2
+      return "Draw2";
+    case 13: //Wild or Wild Draw 4
+      if (Math.floor(num / 14) >= 4) {
+        return "Draw4";
+      } else {
+        return "Wild";
+      }
+    default:
+      return num % 14;
   }
 };
 
-generateDeck(
-  ["red", "blue", "green", "yellow"],
-  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-);
+// Load the image
+const cardImage = new Image();
+cardImage.src = "./assets/deck.svg";
 
-let players = [
-  {
-    name: "",
-    hand: [],
-  },
-];
-let currentPlayer = 0;
-let direction = 1;
-let currentCardColor = "";
-let currentCardNumber = 0;
-let isWildCard = false;
-let wildCardColor = "";
-
-// This function can be used to create a single card or even a full deck of cards if we pass an array of numbers
-const generateNumCards = (cardColor, cardNumber) => {
-  const parentElement = document.getElementById("cards-container");
-
-  // Create card structure
-  const cardElement = document.createElement("div");
-  cardElement.classList.add("uno-card", cardColor);
-
-  const topLeft = document.createElement("div");
-  topLeft.classList.add("top-left");
-  topLeft.innerText = cardNumber;
-
-  const circle = document.createElement("div");
-  circle.classList.add("circle");
-
-  const number = document.createElement("div");
-  number.classList.add("number");
-  number.innerText = cardNumber;
-
-  const bottomRight = document.createElement("div");
-  bottomRight.classList.add("bottom-right");
-  bottomRight.innerText = cardNumber;
-
-  // Append all parts to the card
-  cardElement.appendChild(topLeft);
-  cardElement.appendChild(circle);
-  cardElement.appendChild(number);
-  cardElement.appendChild(bottomRight);
-
-  // Append the card to the parent element
-  parentElement.appendChild(cardElement);
+// Create the deck from the SVG and remove blank cards from deck
+cardImage.onload = () => {
+  let num = 0;
+  for (let y = 0; y < 8 * cardHeight; y += cardHeight) {
+    for (let x = 0, count = 0; count < 14; x += cardWidth, count++) {
+      // Skip the first card in rows 5-8
+      if (y >= 4 * cardHeight && count === 0) {
+        num++;
+        continue;
+      }
+      const cardEl = createCardElement(cardImage, x + 1, y - 1);
+      cardEl.dataset.color = cardColor(num);
+      cardEl.dataset.type = cardType(num);
+      deck.push(cardEl);
+      num++;
+    }
+  }
+  //! Debug
+  console.log("Deck initialized with " + deck.length + " cards.");
 };
 
-const generatespecialCard = (cardColor, cardNumber = "Wild") => {
-  const parentElement = document.getElementById("cards-container");
+// Function to create a canvas with a specific card drawn on it
+const createCardElement = (cardImage, x, y) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = cardWidth;
+  canvas.height = cardHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(
+    cardImage,
+    x,
+    y,
+    cardWidth,
+    cardHeight,
+    0,
+    0,
+    cardWidth,
+    cardHeight
+  );
+  canvas.onclick = () => playCard(canvas);
+  return canvas;
+};
+const cardPile = document.getElementById("card-pile");
+const cardDeckEl = document.getElementById("card-deck");
 
-  // Create card structure
-  const cardElement = document.createElement("div");
-  cardElement.classList.add("uno-card", cardColor);
+// Function to create a canvas element for the back of a card
+const createBackCardElement = (color, type) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = cardWidth;
+  canvas.height = cardHeight;
+  const ctx = canvas.getContext("2d");
 
-  const topLeft = document.createElement("div");
-  topLeft.classList.add("top-left");
-  topLeft.innerText = cardNumber;
+  const backCardImage = new Image();
+  backCardImage.src = "./assets/uno.svg"; // Path to the back of the card image
+  backCardImage.onload = () => {
+    ctx.drawImage(backCardImage, 0, 0, cardWidth, cardHeight);
+  };
 
-  const circle = document.createElement("div");
-  circle.classList.add("circle");
+  // Store the actual card information in the dataset
+  canvas.dataset.color = color;
+  canvas.dataset.type = type;
 
-  const number = document.createElement("div");
-  number.classList.add("number");
-  number.innerText = cardNumber;
-
-  const bottomRight = document.createElement("div");
-  bottomRight.classList.add("bottom-right");
-  bottomRight.innerText = cardNumber;
-
-  // Append all parts to the card
-  cardElement.appendChild(topLeft);
-  cardElement.appendChild(circle);
-  cardElement.appendChild(number);
-  cardElement.appendChild(bottomRight);
-
-  // Append the card to the parent element
-  parentElement.appendChild(cardElement);
+  return canvas;
 };
 
-// function to get a random card from the deck
-const getRandomCard = () => {
-  // get a random number between 0 and the length of the deck
-  const randomCard = Math.floor(Math.random() * deck.length);
-  // return the random card
-  return randomCard;
+// Shuffle the deck
+const shuffleDeck = () => {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  //! Debug
+  console.log("Deck shuffled.");
 };
 
-// function to deal the cards to the players
+//#endregion
+
+//#region Modal Logic
+// When the page loads, show the modal
+window.onload = function () {
+  var modal = document.getElementById("opponentSelectDialog");
+  modal.style.display = "block";
+
+  // Get the <span> element that closes the modal
+  var span = document.getElementsByClassName("close")[0];
+
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function () {
+    modal.style.display = "none";
+  };
+};
+//#endregion
+
+const initializeDiscardPile = () => {
+  if (deck.length > 0) {
+    const flippedCard = deck.shift();
+    const flippedCardElement = document.getElementById("discarded-card");
+    flippedCard.id = "discarded-card";
+    flippedCardElement.replaceWith(flippedCard); // Replace the canvas with the actual card
+    discardPile.push(flippedCard);
+  }
+  console.log("Discard pile initialized.");
+};
+
+// Function to initialize players
+const initializePlayers = (opponentCount, playerName) => {
+  for (let i = 0; i <= opponentCount; i++) {
+    players.push({ name: i === 0 ? playerName : `Opponent ${i}`, hand: [] });
+  }
+};
+
+//#region Game Logic
+// Function to start the game with the selected number of opponents and player name
+const startGame = () => {
+  var playerName = document.getElementById("playerName").value.trim();
+  var opponentCount = document.getElementById("opponentCount").value;
+
+  if (!playerName) {
+    alert("Please enter your name.");
+    return;
+  }
+
+  //* This will never evaluate to true, but just good practice to add the validation
+  if (!opponentCount) {
+    alert("Please select the number of opponents.");
+    return;
+  }
+
+  // Display names of opponents based on the selected number
+  if (opponentCount >= 1) {
+    document.getElementById("opponent-1-NameDisplay").style.display = "block";
+  }
+  if (opponentCount >= 2) {
+    document.getElementById("opponent-2-NameDisplay").style.display = "block";
+  }
+  if (opponentCount >= 3) {
+    document.getElementById("opponent-3-NameDisplay").style.display = "block";
+  }
+
+  // Additional game initialization logic
+  // Close the modal after selection
+  document.getElementById("opponentSelectDialog").style.display = "none";
+  initializePlayers(opponentCount, playerName);
+  var playerNameDisplay = document.getElementById("playerNameDisplay");
+  playerNameDisplay.innerHTML = playerName;
+  playerNameDisplay.style.display = "block";
+  shuffleDeck();
+  dealCards();
+  initializeDiscardPile();
+};
+
+// Function to deal cards
 const dealCards = () => {
-  // loop through the players
-  for (let i = 0; i < players.length; i++) {
-    // loop through the cards
-    for (let j = 0; j < 7; j++) {
-      // get a random card
-      const randomCard = getRandomCard();
-      // push the card to the player's hand
-      players[i].hand.push(randomCard);
-      // remove the card from the deck
-      deck.splice(randomCard, 1);
-    }
+  for (let cardCount = 0; cardCount < 7; cardCount++) {
+    players.forEach((player, index) => {
+      if (deck.length > 0) {
+        const card = deck.shift();
+
+        if (
+          player.name === document.getElementById("playerName").value.trim()
+        ) {
+          // Dealing to the human player
+          player.hand.push(card);
+          const playerCardsContainer = document.getElementById("player-cards");
+          playerCardsContainer.appendChild(card); // Add the card to the player's cards container
+        } else {
+          // Dealing to opponents
+          const backCardCanvas = createBackCardElement(
+            card.dataset.color,
+            card.dataset.type
+          );
+          player.hand.push(backCardCanvas);
+          // Determine the correct container for each opponent
+          let opponentContainerId = "";
+          switch (index) {
+            case 1:
+              opponentContainerId = "opponent-1-cards"; // Opponent 1 (Top)
+              break;
+            case 2:
+              opponentContainerId = "opponent-2-cards"; // Opponent 2 (Left)
+              break;
+            case 3:
+              opponentContainerId = "opponent-3-cards"; // Opponent 3 (Right)
+              break;
+          }
+          const opponentContainer =
+            document.getElementById(opponentContainerId);
+          if (opponentContainer) {
+            opponentContainer.appendChild(backCardCanvas); // Add the back of the card canvas to the opponent's container
+          }
+        }
+      }
+    });
+  }
+  console.log("Cards dealt.");
+  console.log(players);
+};
+
+// Function to draw a card from the pile of cards
+const drawCard = () => {
+  if (deck.length > 0) {
+    const card = deck.shift();
+    const playerHand = players[0].hand; // Assuming players[0] is the human player
+    playerHand.push(card);
+    const playerCardsContainer = document.getElementById("player-cards");
+    playerCardsContainer.appendChild(card);
   }
 };
-//if card matches color or number, is a skip card matching color or if it's a wild card, let it be played
-//if there's more than 2 players, allow direction switching cards to be drawn and played
-const checkCards = (params) => {
-    var currentCardColor, currentCardNumber, wildCard, skipCard, playerChosenColor;
-    if (wildCard == true) {
-        //set up logic to allow player to set color
-        //if +2 or +4, increase next player's hand by that amount
-        currentCardColor = playerChosenColor;
-        currentCardNumber = 0;
-    } else if (skipCard == true && cardColor == currentCardColor) {
-        //allow card to be played and skip next player's turn
-        currentCardColor = playerChosenColor;
-        currentCardNumber = 0;
-    } else if (cardColor == currentCardColor || cardNumber == currentCardNumber) {
-        //allow to be played
-        currentCardColor = cardColor;
-        currentCardNumber = cardNumber;
+
+// Add this event listener to the card pile image
+document.getElementById("card-pile").addEventListener("click", drawCard);
+
+// Logic to determine if legal play was made
+const isLegalPlay = (card) => {
+  // Get the last card from the discard pile
+  const topDiscard = discardPile[discardPile.length - 1];
+
+  // Check if the played card matches the top card of the discard pile in color or type,
+  // or if the played card is a Wild or Wild Draw 4 card.
+  if (card.dataset.type === "Wild" || card.dataset.type === "Draw4") {
+    players[0].hand.splice(players[0].hand.indexOf(card), 1);
+    discardPile.push(card);
+    return true; // Wild and Wild Draw 4 cards can be played on anything
+  } else if (card.dataset.color === topDiscard.dataset.color) {
+    players[0].hand.splice(players[0].hand.indexOf(card), 1);
+    discardPile.push(card);
+    return true; // Same color can always be played
+  } else if (card.dataset.type === topDiscard.dataset.type) {
+    players[0].hand.splice(players[0].hand.indexOf(card), 1);
+    discardPile.push(card);
+    return true; // Same type can always be played
+  }
+
+  // If none of the above conditions are met, the play is illegal
+  return false;
+};
+
+// Function to play a card
+const playCard = (card) => {
+  if (isLegalPlay(card)) {
+    const topCard = document.getElementById("discarded-card");
+    if (topCard) {
+      topCard.replaceWith(card);
+      card.id = "discarded-card"; // Assigning the ID to the new card
     } else {
-        //don't allow the selected card to be played
-        params = "This is not the number 1234";
-        console.log(params);
+      console.error("Something is broken!");
     }
-};
-// function to check if a card can be played
-const canPlayCard = (playedCard, currentPlayer) => {
-    if (playedCard.color === wildCardColor) {
-        // Logic for wild card, check if the chosen color is valid
-        return isValidColor(playerChosenColor);
-    } else if (playedCard.color === currentCardColor || playedCard.number === currentCardNumber) {
-        // Logic for regular cards, check if color or number matches
-        return true;
-    } else if (playedCard.number === "Skip" && playedCard.color === currentCardColor) {
-        // Logic for Skip cards
-        // Perform actions for Skip card (e.g., skipping next player's turn)
-        skipNextPlayer();
-        return true;
-    } else {
-        return false;
-    }
+  } else {
+    alert("Illegal Play, please try again.");
+  }
 };
 
-// function to play a card
-const playCard = (playedCardIndex, playerChosenColor) => {
-    const playedCard = players[currentPlayer].hand[playedCardIndex];
+const handlePlayerTurn = () => {};
 
-    if (canPlayCard(playedCard, currentPlayer)) {
-        // Card can be played
-        currentCardColor = playedCard.color;
-        currentCardNumber = playedCard.number;
-
-        // Additional logic for special cards (e.g., +2 or +4)
-        handleSpecialCard(playedCard);
-
-        // Remove the played card from the player's hand
-        players[currentPlayer].hand.splice(playedCardIndex, 1);
-
-        // Switch to the next player
-        switchPlayer();
-
-        // Draw a card for the next player if needed
-        drawCardForNextPlayer();
-    } else {
-        // Card cannot be played
-        console.log("Invalid move. Try again.");
-    }
-};
-
-// This handles special cards (e.g., +2 or +4)
-const handleSpecialCard = (playedCard) => {
-    if (playedCard.number === "+2") {
-        // Draw two cards for the next player
-        drawCardsForNextPlayer(2);
-    } else if (playedCard.number === "+4") {
-        // Draw four cards for the next player
-        drawCardsForNextPlayer(4);
-    }
-};
-
-// draw cards for the next player
-const drawCardsForNextPlayer = (numCards) => {
-    const nextPlayerIndex = getNextPlayerIndex();
-    for (let i = 0; i < numCards; i++) {
-        const randomCard = getRandomCard();
-        players[nextPlayerIndex].hand.push(randomCard);
-        deck.splice(randomCard, 1);
-    }
-};
-
-// function to skip the next player's turn
-const skipNextPlayer = () => {
-    currentPlayer = getNextPlayerIndex();
-};
-
-// function to switch to the next player
-const switchPlayer = () => {
-    currentPlayer += direction;
-    if (currentPlayer < 0) {
-        currentPlayer = players.length - 1;
-    } else if (currentPlayer >= players.length) {
-        currentPlayer = 0;
-    }
-};
-
-// function to get the index of the next player
-const getNextPlayerIndex = () => {
-    let nextPlayer = currentPlayer + direction;
-    if (nextPlayer < 0) {
-        nextPlayer = players.length - 1;
-    } else if (nextPlayer >= players.length) {
-        nextPlayer = 0;
-    }
-    return nextPlayer;
-};
-
-// function to check if a color is valid
-const isValidColor = (color) => {
-    return ["red", "blue", "green", "yellow"].includes(color);
-};
+//#endregion
