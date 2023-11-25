@@ -409,6 +409,16 @@ const cpuPlay = () => {
   }
 };
 
+const playAlert = (message) => {
+  var x = document.getElementById("toast");
+  x.className = "show";
+  x.innerText = message;
+  // After 3 seconds, remove the show class from DIV
+  setTimeout(function () {
+    x.className = x.className.replace("show", "");
+  }, 3000);
+};
+
 //#region Event Listeners
 // Event listener for the card deck
 document.getElementById("card-pile").addEventListener("click", drawCard);
