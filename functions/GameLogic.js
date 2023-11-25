@@ -299,6 +299,16 @@ const isLegalPlay = (card) => {
 
 // Function to play a card
 const playCard = (card) => {
+  //check if uno
+  for (var i = 0; i<players.length; i++){
+    console.log(players[i])
+    if (players[i].hand.length == 1){
+      playAlert("Uno!")
+    }
+  }
+  if(card.dataset.type == "Wild" || card.dataset.type == "Skip" || card.dataset.type =="Draw4"){
+    playAlert(card.dataset.type)
+  }
   if (isLegalPlay(card)) {
     const topCard = document.getElementById("discarded-card");
     if (topCard) {
@@ -308,10 +318,19 @@ const playCard = (card) => {
       console.error("Something is broken!");
     }
   } else {
-    alert("Illegal Play, please try again.");
+    // alert("Illegal Play, please try again.");
+    playAlert("Illegal Play, please try again. ")
   }
 };
 
 const handlePlayerTurn = () => {};
+
+const playAlert = ( message ) => {
+  var x = document.getElementById("toast");
+  x.className = "show";
+  x.innerText = message
+  // After 3 seconds, remove the show class from DIV
+  setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+}
 
 //#endregion
