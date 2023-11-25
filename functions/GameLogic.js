@@ -2,16 +2,18 @@
 var players = []; // Array to hold each player's hand
 var deck = []; // Array to hold the deck of cards
 var discardPile = []; // Array to hold the discard pile
+let cpuPlayInterval; // Variable to hold the interval for CPU play
 var currentColorInPlay = ""; // Variable to hold the current color in play
 var maxDrawCount = 0; // Variable to hold the max number of cards to draw
-var currentPlayer = null; // Variable to hold the current player
+var drawnCount = 0; // Variable to hold the number of cards drawn
+var currentPlayer = {}; // Variable to hold the current player
+var turnCount = 1; // Variable to hold the current turn count
+var turnLog = []; // Array to hold the turn log// Variable to hold whether it is the player's turn
 const cardWidth = 73;
 const cardHeight = 110;
-
 //#endregion
 
-//#region Card Generation
-
+//#region Helper Functions
 const cardColor = (num) => {
   let color;
   if (num % 14 === 13) {
@@ -57,6 +59,54 @@ const cardType = (num) => {
   }
 };
 
+// Function to create a canvas with a specific card drawn on it
+const createCardElement = (cardImage, x, y, discarded = false) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = cardWidth;
+  canvas.height = cardHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(
+    cardImage,
+    x,
+    y,
+    cardWidth,
+    cardHeight,
+    0,
+    0,
+    cardWidth,
+    cardHeight
+  );
+  !discarded && (canvas.onclick = () => playCard(canvas));
+  return canvas;
+};
+
+const convertCPUBackCardtoFront = (card) => {
+  const frontCard = createCardElement(cardImage, cardWidth, cardHeight, true);
+  frontCard.dataset.color = card.dataset.color;
+  frontCard.dataset.type = card.dataset.type;
+  return frontCard;
+};
+
+// Function to create a canvas element for the back of a card
+const createBackCardElement = (color, type) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = cardWidth;
+  canvas.height = cardHeight;
+  const ctx = canvas.getContext("2d");
+
+  const backCardImage = new Image();
+  backCardImage.src = "./assets/uno.svg"; // Path to the back of the card image
+  backCardImage.onload = () => {
+    ctx.drawImage(backCardImage, 0, 0, cardWidth, cardHeight);
+  };
+
+  // Store the actual card information in the dataset
+  canvas.dataset.color = color;
+  canvas.dataset.type = type;
+
+  return canvas;
+};
+
 // Load the image
 const cardImage = new Image();
 cardImage.src = "./assets/deck.svg";
@@ -82,57 +132,27 @@ cardImage.onload = () => {
   console.log("Deck initialized with " + deck.length + " cards.");
 };
 
-// Function to create a canvas with a specific card drawn on it
-const createCardElement = (cardImage, x, y) => {
-  const canvas = document.createElement("canvas");
-  canvas.width = cardWidth;
-  canvas.height = cardHeight;
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(
-    cardImage,
-    x,
-    y,
-    cardWidth,
-    cardHeight,
-    0,
-    0,
-    cardWidth,
-    cardHeight
-  );
-  canvas.onclick = () => playCard(canvas);
-  return canvas;
-};
 const cardPile = document.getElementById("card-pile");
 const cardDeckEl = document.getElementById("card-deck");
 
-// Function to create a canvas element for the back of a card
-const createBackCardElement = (color, type) => {
-  const canvas = document.createElement("canvas");
-  canvas.width = cardWidth;
-  canvas.height = cardHeight;
-  const ctx = canvas.getContext("2d");
-
-  const backCardImage = new Image();
-  backCardImage.src = "./assets/uno.svg"; // Path to the back of the card image
-  backCardImage.onload = () => {
-    ctx.drawImage(backCardImage, 0, 0, cardWidth, cardHeight);
-  };
-
-  // Store the actual card information in the dataset
-  canvas.dataset.color = color;
-  canvas.dataset.type = type;
-
-  return canvas;
-};
-
-// Shuffle the deck
-const shuffleDeck = () => {
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
+const determineCPUContainer = (index, backCardCanvas) => {
+  // Determine the correct container for each opponent
+  let opponentContainerId = "";
+  switch (index) {
+    case 1:
+      opponentContainerId = "opponent-1-cards"; // Opponent 1 (Top)
+      break;
+    case 2:
+      opponentContainerId = "opponent-2-cards"; // Opponent 2 (Left)
+      break;
+    case 3:
+      opponentContainerId = "opponent-3-cards"; // Opponent 3 (Right)
+      break;
   }
-  //! Debug
-  console.log("Deck shuffled.");
+  const opponentContainer = document.getElementById(opponentContainerId);
+  if (opponentContainer) {
+    opponentContainer.appendChild(backCardCanvas); // Add the back of the card canvas to the opponent's container
+  }
 };
 
 //#endregion
@@ -153,6 +173,17 @@ window.onload = function () {
 };
 //#endregion
 
+//#region Game Initialization Logic
+// Shuffle the deck
+const shuffleDeck = () => {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  //! Debug
+  console.log("Deck shuffled.");
+};
+
 const initializeDiscardPile = () => {
   if (deck.length > 0) {
     const flippedCard = deck.shift();
@@ -171,7 +202,6 @@ const initializePlayers = (opponentCount, playerName) => {
   }
 };
 
-//#region Game Logic
 // Function to start the game with the selected number of opponents and player name
 const startGame = () => {
   var playerName = document.getElementById("playerName").value.trim();
@@ -209,15 +239,18 @@ const startGame = () => {
   shuffleDeck();
   dealCards();
   initializeDiscardPile();
+  console.log("Game started.");
 };
 
+//#endregion
+
+//#region Card & Turn Logic
 // Function to deal cards
 const dealCards = () => {
   for (let cardCount = 0; cardCount < 7; cardCount++) {
     players.forEach((player, index) => {
       if (deck.length > 0) {
         const card = deck.shift();
-
         if (
           player.name === document.getElementById("playerName").value.trim()
         ) {
@@ -232,45 +265,50 @@ const dealCards = () => {
             card.dataset.type
           );
           player.hand.push(backCardCanvas);
-          // Determine the correct container for each opponent
-          let opponentContainerId = "";
-          switch (index) {
-            case 1:
-              opponentContainerId = "opponent-1-cards"; // Opponent 1 (Top)
-              break;
-            case 2:
-              opponentContainerId = "opponent-2-cards"; // Opponent 2 (Left)
-              break;
-            case 3:
-              opponentContainerId = "opponent-3-cards"; // Opponent 3 (Right)
-              break;
-          }
-          const opponentContainer =
-            document.getElementById(opponentContainerId);
-          if (opponentContainer) {
-            opponentContainer.appendChild(backCardCanvas); // Add the back of the card canvas to the opponent's container
-          }
+          determineCPUContainer(index, backCardCanvas);
         }
       }
     });
   }
   console.log("Cards dealt.");
-  console.log(players);
+  console.log("Players", players);
+};
+
+// function to change currentPlayer
+const changePlayer = () => {
+  if (currentPlayer.name === players[players.length - 1].name) {
+    currentPlayer = players[0];
+  } else {
+    currentPlayer = players[players.indexOf(currentPlayer) + 1];
+  }
+  drawnCount = 0;
+  turnCount++;
+  turnLog.push(`${currentPlayer.name}'s turn.`);
+  const gameLog = document.getElementById("game-log");
+  gameLog.innerHTML = turnLog
+    .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
+    .join("");
 };
 
 // Function to draw a card from the pile
 const drawCard = () => {
-  if (deck.length > 0) {
+  if (deck.length > 0 && allowDraw(maxDrawCount)) {
     const card = deck.shift();
-    const playerHand = players[0].hand; // Assuming players[0] is the human player
+    const playerHand = currentPlayer.hand;
     playerHand.push(card);
+
     const playerCardsContainer = document.getElementById("player-cards");
     playerCardsContainer.appendChild(card);
+
+    turnLog.push(
+      `${currentPlayer.name} drew a card. They now have ${currentPlayer.hand.length} cards.`
+    );
+    const gameLog = document.getElementById("game-log");
+    gameLog.innerHTML = turnLog
+      .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
+      .join("");
   }
 };
-
-// Add this event listener to the card pile image
-document.getElementById("card-pile").addEventListener("click", drawCard);
 
 // Logic to determine if legal play was made
 const isLegalPlay = (card) => {
@@ -312,6 +350,7 @@ const playCard = (card) => {
   }
 };
 
-const handlePlayerTurn = () => {};
-
+//#region Event Listeners
+// Event listener for the card deck
+document.getElementById("card-pile").addEventListener("click", drawCard);
 //#endregion

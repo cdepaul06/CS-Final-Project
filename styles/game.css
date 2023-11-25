@@ -40,7 +40,7 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   margin-top: 3rem;
   height: 75vh;
   width: 75vw;
@@ -67,15 +67,15 @@
 
 .player-name {
   color: #ffffff;
-  border: 1px solid #ffffff;
+  border: 1px solid #000000;
   width: 20%;
   border-radius: 30px;
   padding: 10px;
   font-size: 20px;
   width: auto;
-  background-color: slategray;
+  background-color: rgb(250, 50, 2);
   position: absolute;
-  top: 98%;
+  top: 100%;
 }
 
 .player-area {
@@ -97,13 +97,13 @@
 
 .opponent-1-name {
   color: #ffffff;
-  border: 1px solid #ffffff;
+  border: 1px solid #000000;
   border-radius: 30px;
   padding: 10px;
   font-size: 20px;
-  background-color: slategray;
+  background-color: rgb(250, 50, 2);
   position: absolute;
-  top: -5%; /* Adjust as needed */
+  top: -6%; /* Adjust as needed */
   left: 50%;
   transform: translateX(-50%);
   text-align: center; /* Center the text */
@@ -120,14 +120,14 @@
 /* Opponent 2 Name Display */
 .opponent-2-name {
   color: #ffffff;
-  border: 1px solid #ffffff;
+  border: 1px solid #000000;
   border-radius: 30px;
   padding: 10px;
   font-size: 20px;
-  background-color: slategray;
+  background-color: rgb(250, 50, 2);
   position: absolute;
   left: 35%; /* Adjust as needed */
-  top: 170%;
+  top: 224%;
   text-align: center; /* Center the text */
   width: auto; /* Adjust width to fit the text */
 }
@@ -152,14 +152,14 @@
 /* Opponent 3 Name Display */
 .opponent-3-name {
   color: #ffffff;
-  border: 1px solid #ffffff;
+  border: 1px solid #000000;
   border-radius: 30px;
   padding: 10px;
   font-size: 20px;
-  background-color: slategray;
+  background-color: rgb(250, 50, 2);
   position: absolute;
   right: 35%; /* Adjust as needed */
-  top: 170%;
+  top: 224%;
   text-align: center; /* Center the text */
   width: auto; /* Adjust width to fit the text */
 }
@@ -240,6 +240,35 @@
 .opponent-3-name {
   display: none;
 }
+
+.game-log-container {
+  position: absolute;
+  width: 20rem;
+  top: 0;
+  right: 0;
+  background-color: #000000;
+  opacity: 0.6;
+  height: 100%;
+  color: #ffffff;
+  border-left: 1px solid #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+}
+
+.game-log-container h2 {
+  text-align: center;
+  margin: 0;
+  padding: 10px;
+  border-bottom: 1px solid #ffffff;
+}
+
+.game-log {
+  overflow-y: scroll;
+  height: 100%;
+  padding: 10px;
+}
+
 
 
 
