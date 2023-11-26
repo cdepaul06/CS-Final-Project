@@ -12,6 +12,9 @@ var colorChangeCard = false; // Variable to hold whether a special card was play
 var colors = ["red", "yellow", "green", "blue"]; // Array to hold the colors
 const cardWidth = 73;
 const cardHeight = 110;
+var playerName = document.getElementById("playerName").value.trim();
+var opponentCount = document.getElementById("opponentCount").value;
+var selectedColor = document.getElementById("colorSelection").value;
 //#endregion
 
 //#region Helper Functions
@@ -207,9 +210,6 @@ const initializePlayers = (opponentCount, playerName) => {
 
 // Function to start the game with the selected number of opponents and player name
 const startGame = () => {
-  var playerName = document.getElementById("playerName").value.trim();
-  var opponentCount = document.getElementById("opponentCount").value;
-
   if (!playerName) {
     playAlert("Please enter your name.");
     return;
@@ -400,9 +400,10 @@ const playCard = (card) => {
         currentPlayer = players[currentPlayerIndex - 1];
       }
 
-      if (!colorChangeCard) {
-        changePlayer();
+      if (colorChangeCard) {
+        changePlayer(true);
       }
+      changePlayer();
       if (currentPlayer.name !== playerName && !colorChangeCard) {
         startCPUPlay();
       }
@@ -415,7 +416,6 @@ const playCard = (card) => {
 };
 
 const checkForColorChange = (card) => {
-  // if a draw 4 or wild is played open a modal to select a color
   console.log("currrent player", currentPlayer.name);
   console.log("playerName", playerName);
   if (
@@ -434,11 +434,15 @@ const checkForColorChange = (card) => {
     turnLogText.push(
       `${currentPlayer.name} changed the color to ${currentColorInPlay}.`
     );
+    colorChangeCard = false;
+    changePlayer(); // Ensuring changePlayer is called after CPU changes color
+    if (currentPlayer.name !== playerName) {
+      startCPUPlay(); // Starting the next CPU play if applicable
+    }
   }
 };
 
 const setCurrentColor = () => {
-  var selectedColor = document.getElementById("colorSelection").value;
   currentColorInPlay = selectedColor;
   turnLogText.push(
     `${currentPlayer.name} changed the color to ${currentColorInPlay}.`
@@ -451,16 +455,21 @@ const setCurrentColor = () => {
   var modal = document.getElementById("colorSelectDialog");
   modal.style.display = "none";
   colorChangeCard = false;
-  discardPile[discardPile.length - 1].dataset.color = currentColorInPlay;
-  changePlayer();
-  startCPUPlay();
+  changePlayer(); // Ensuring changePlayer is called after human player changes color
+  if (currentPlayer.name !== playerName) {
+    startCPUPlay(); // Starting the next CPU play if it's not the human player's turn
+  }
 };
 
 // function to change currentPlayer
-const changePlayer = () => {
-  // change the current player to the next player in the array
-  currentPlayer =
-    players[(players.indexOf(currentPlayer) + 1) % players.length];
+const changePlayer = (waitForColorChange = false) => {
+  if (waitForColorChange) {
+    return;
+  }
+  const currentPlayerIndex = players.indexOf(currentPlayer);
+  const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
+  currentPlayer = players[nextPlayerIndex];
+
   drawnCount = 0;
   turnLogText.push(`${currentPlayer.name}'s turn.`);
   const gameLog = document.getElementById("game-log");
