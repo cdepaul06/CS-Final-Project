@@ -312,7 +312,8 @@ const isLegalPlay = (card) => {
 const playCard = (card) => {
   if (isLegalPlay(card)) {
     const topCard = document.getElementById("discarded-card");
-    if (topCard) {
+      if (topCard) {
+          cardPlaySound.play();
       topCard.replaceWith(card);
       card.id = "discarded-card"; // Assigning the ID to the new card
     } else {
