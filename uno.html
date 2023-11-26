@@ -25,19 +25,6 @@
   </div>
 </div>
 
-<!-- Dialog for selecting a color when a wild card is played
-<div id="colorSelectionModalSubmit">
-<div id="colorSelectDialog" class="modal" style="display:none;">
-  <div class="modal-content">
-      <h2>Choose a color:</h2>
-      <select id="colorSelection">
-          <option value="red">Red</option>
-          <option value="blue">Blue</option>
-          <option value="green">Green</option>
-          <option value="yellow">Yellow</option>
-  </div>
-  </div> -->
-
  <!-- This is the main container for the game, it will house all the cards, but we can
         always add more to it, this is just a placeholder for now -->
         <div id="cards-container" class="cards-container">
@@ -74,6 +61,20 @@
           <h2>Game Log</h2>
           <div id="game-log" class="game-log"></div>
         </div>
+
+        <!-- Dialog for selecting a color when a wild card is played -->
+  <div id="colorSelectDialog" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h2>Choose a color:</h2>
+        <select id="colorSelection">
+            <option value="red">Red</option>
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+            <option value="yellow">Yellow</option>
+        </select>
+        <button onclick="setCurrentColor()">Set Color</button>
+    </div>
+    </div>
 
     <script type="text/javascript" src="functions/GameLogic.js"></script>
   </body>
