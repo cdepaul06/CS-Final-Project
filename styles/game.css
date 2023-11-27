@@ -269,6 +269,31 @@
   padding: 10px;
 }
 
+#colorSelectStyles {
+  .modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 46%; /* Center the modal horizontally */
+    top: 63%; /* Center the modal vertically */
+    width: 210px; /* Width of the modal */
+    height: auto; /* Height based on content */
+    transform: translate(-50%, -50%); /* Adjust position to truly center the modal */
+    overflow: auto; /* Enable scroll if needed */
+  }
+  
+  .modal-content {
+    background-color: #000000;
+    align-items: center;
+    color: #ffffff;
+    margin: auto; /* Auto margin for centering */
+    padding: 20px;
+    border: 1px solid #ffffff;
+    border-radius: 30px;
+    width: 80%; /* Width of the content within the modal */
+  }
+}
+
 
 
 

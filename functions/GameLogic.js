@@ -8,13 +8,12 @@ var maxDrawCount = 0; // Variable to hold the max number of cards to draw
 var drawnCount = 0; // Variable to hold the number of cards drawn
 var currentPlayer = {}; // Variable to hold the current player
 var turnLogText = []; // Array to hold the turn log// Variable to hold whether it is the player's turn
-var colorChangeCard = false; // Variable to hold whether a special card was played
 var colors = ["red", "yellow", "green", "blue"]; // Array to hold the colors
 const cardWidth = 73;
 const cardHeight = 110;
-var playerName = document.getElementById("playerName").value.trim();
-var opponentCount = document.getElementById("opponentCount").value;
-var selectedColor = document.getElementById("colorSelection").value;
+var playerName = null;
+var opponentCount = null;
+var selectedColor = null;
 //#endregion
 
 //#region Helper Functions
@@ -210,6 +209,9 @@ const initializePlayers = (opponentCount, playerName) => {
 
 // Function to start the game with the selected number of opponents and player name
 const startGame = () => {
+  playerName = document.getElementById("playerName").value.trim();
+  opponentCount = document.getElementById("opponentCount").value;
+
   if (!playerName) {
     playAlert("Please enter your name.");
     return;
@@ -243,10 +245,18 @@ const startGame = () => {
   dealCards();
   initializeDiscardPile();
 
+  currentPlayer = players[0];
+
   currentColorInPlay = discardPile[discardPile.length - 1].dataset.color;
   if (discardPile[discardPile.length - 1].dataset.type === "Draw4") {
     maxDrawCount = 4;
+    checkForColorChange(discardPile[discardPile.length - 1]);
   }
+
+  if (discardPile[discardPile.length - 1].dataset.type === "Wild") {
+    checkForColorChange(discardPile[discardPile.length - 1]);
+  }
+
   if (discardPile[discardPile.length - 1].dataset.type === "Draw2") {
     maxDrawCount = 2;
   }
@@ -368,7 +378,6 @@ const playCard = (card) => {
 
   if (isLegalPlay(card)) {
     const topCard = document.getElementById("discarded-card");
-    checkForColorChange(card);
     if (topCard) {
       topCard.replaceWith(card);
       card.id = "discarded-card"; // Assigning the ID to the new card
@@ -382,7 +391,7 @@ const playCard = (card) => {
         .join("");
 
       if (card.dataset.type == "Wild" || card.dataset.type == "Draw4") {
-        colorChangeCard = true;
+        checkForColorChange(card);
       }
 
       if (card.dataset.type == "Draw2") {
@@ -397,16 +406,13 @@ const playCard = (card) => {
       if (card.dataset.type === "Reverse") {
         let currentPlayerIndex = players.indexOf(currentPlayer);
         players.reverse();
-        currentPlayer = players[currentPlayerIndex - 1];
+        currentPlayer = players[currentPlayerIndex];
       }
 
-      if (colorChangeCard) {
-        changePlayer(true);
-      }
       changePlayer();
-      if (currentPlayer.name !== playerName && !colorChangeCard) {
-        startCPUPlay();
-      }
+
+      let currentPlayerIndex = players.indexOf(currentPlayer);
+      currentPlayerIndex != players[0] ? startCPUPlay() : null;
     } else {
       console.error("Something is broken!");
     }
@@ -416,8 +422,6 @@ const playCard = (card) => {
 };
 
 const checkForColorChange = (card) => {
-  console.log("currrent player", currentPlayer.name);
-  console.log("playerName", playerName);
   if (
     (card.dataset.type === "Wild" || card.dataset.type === "Draw4") &&
     currentPlayer.name === playerName
@@ -434,8 +438,6 @@ const checkForColorChange = (card) => {
     turnLogText.push(
       `${currentPlayer.name} changed the color to ${currentColorInPlay}.`
     );
-    colorChangeCard = false;
-    changePlayer(); // Ensuring changePlayer is called after CPU changes color
     if (currentPlayer.name !== playerName) {
       startCPUPlay(); // Starting the next CPU play if applicable
     }
@@ -443,7 +445,9 @@ const checkForColorChange = (card) => {
 };
 
 const setCurrentColor = () => {
+  selectedColor = document.getElementById("colorSelection").value;
   currentColorInPlay = selectedColor;
+  discardPile[discardPile.length - 1].dataset.color = currentColorInPlay;
   turnLogText.push(
     `${currentPlayer.name} changed the color to ${currentColorInPlay}.`
   );
@@ -454,8 +458,7 @@ const setCurrentColor = () => {
 
   var modal = document.getElementById("colorSelectDialog");
   modal.style.display = "none";
-  colorChangeCard = false;
-  changePlayer(); // Ensuring changePlayer is called after human player changes color
+
   if (currentPlayer.name !== playerName) {
     startCPUPlay(); // Starting the next CPU play if it's not the human player's turn
   }
