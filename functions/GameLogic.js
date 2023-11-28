@@ -16,7 +16,13 @@ var opponentCount = null;
 var selectedColor = null;
 //#endregion
 
-//#region Helper Functions
+//#region Sound Effects
+const cardHoverSound = document.getElementById("cardHoverSound");
+const cardPlaySound = document.getElementById("cardPlaySound");
+//#endregion
+
+//#region Card Generation
+
 const cardColor = (num) => {
   let color;
   if (num % 14 === 13) {
@@ -80,6 +86,12 @@ const createCardElement = (cardImage, x, y) => {
     cardHeight
   );
   canvas.onclick = () => playCard(canvas);
+  canvas.onmouseover = () => {
+    if (cardHoverSound) {
+      cardHoverSound.currentTime = 0; // Reset playback position to the start
+      cardHoverSound.play(); // Play the sound when the mouse is over the card
+    }
+  };
   return canvas;
 };
 
@@ -383,6 +395,7 @@ const playCard = (card) => {
   if (isLegalPlay(card)) {
     const topCard = document.getElementById("discarded-card");
     if (topCard) {
+      cardPlaySound.play();
       topCard.replaceWith(card);
       card.id = "discarded-card"; // Assigning the ID to the new card
       card.onclick = null; // Removing the onclick event from the new card
