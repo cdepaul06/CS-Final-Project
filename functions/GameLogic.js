@@ -95,13 +95,6 @@ const createCardElement = (cardImage, x, y) => {
   return canvas;
 };
 
-const convertCPUBackCardtoFront = (card) => {
-  const frontCard = createCardElement(cardImage, cardWidth, cardHeight, true);
-  frontCard.dataset.color = card.dataset.color;
-  frontCard.dataset.type = card.dataset.type;
-  return frontCard;
-};
-
 // Function to create a canvas element for the back of a card
 const createBackCardElement = (color, type) => {
   const canvas = document.createElement("canvas");
@@ -435,8 +428,8 @@ const flipCardToFront = (card) => {
 
     ctx.drawImage(
       cardImage,
-      x,
-      y,
+      x + 1,
+      y - 1,
       cardWidth,
       cardHeight,
       0,
