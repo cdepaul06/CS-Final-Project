@@ -517,15 +517,20 @@ const playCard = (card) => {
         if (currentPlayer.name === playerName) {
           return;
         }
+      } else if (card.dataset.type === "Draw2") {
+        maxDrawCount = 2;
+        if (currentPlayer.name === playerName) {
+          return;
+        }
       }
-    } else if (card.dataset.type === "Draw2") {
-      maxDrawCount = 2;
     }
 
     // Change player after a Draw2/Draw4 card or other regular cards
     if (card.dataset.type === "Draw2" || card.dataset.type === "Draw4") {
-      changePlayer();
-      if (currentPlayer.name !== playerName) {
+      if (currentPlayer.name === playerName) {
+        return;
+      } else {
+        changePlayer();
         startCPUPlay();
       }
       return;
@@ -559,11 +564,11 @@ const checkForColorChange = (card) => {
     // if not a human player randomly select a color from colors array
     currentColorInPlay = colors[Math.floor(Math.random() * colors.length)];
     discardPile[discardPile.length - 1].dataset.color = currentColorInPlay;
-    turnLogText.push(
-      `${currentPlayer.name} changed the color to ${currentColorInPlay}.`
-    );
-    updateGameLog();
   }
+  turnLogText.push(
+    `${currentPlayer.name} changed the color to ${currentColorInPlay}.`
+  );
+  updateGameLog();
 };
 
 const setCurrentColor = () => {
@@ -671,8 +676,11 @@ const playAlert = (message) => {
 
 // check to see if a player has won the game
 const checkForWinner = () => {
-  if (currentPlayer.hand.length === 0) {
-    playAlert(`${currentPlayer.name} has won the game!`);
+  // find the player in the players array that has an empty hand
+  const winner = players.find((p) => p.hand.length === 0)?.name;
+
+  if (players.find((p) => p.hand.length === 0)) {
+    playAlert(`${winner} has won the game!`);
     return true;
   } else {
     return false;
