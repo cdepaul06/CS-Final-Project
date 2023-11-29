@@ -335,7 +335,6 @@ const dealCards = () => {
     });
   }
   console.log("Cards dealt.");
-  console.log("deal cards players hand", players);
 };
 
 // Function to draw a card from the pile of cards
@@ -382,8 +381,6 @@ const drawCard = () => {
       }
     }
   }
-  console.log("draw cards players hand", players);
-  console.log("end draw current player", currentPlayer);
 };
 
 // Logic to determine if legal play was made
@@ -468,9 +465,9 @@ const playCard = (card) => {
       checkForColorChange(card);
       if (card.dataset.type === "Draw4") {
         maxDrawCount = 4;
-      }
-      if (currentPlayer.name === playerName) {
-        return;
+        if (currentPlayer.name === playerName) {
+          return;
+        }
       }
     } else if (card.dataset.type === "Draw2") {
       maxDrawCount = 2;
@@ -497,7 +494,6 @@ const playCard = (card) => {
   if (!topCard) {
     console.error("Something is broken!");
   }
-  console.log("play card players hand", players);
 };
 
 const checkForColorChange = (card) => {
@@ -586,6 +582,7 @@ const canPlayCard = (card) => {
 // If the current player which is not human has a playable card, use the playCard function
 const cpuPlay = () => {
   if (currentPlayer.name !== playerName) {
+    cpuPlayTimeout = 4000;
     setTimeout(() => {
       if (maxDrawCount > 0) {
         // Draw the required cards
@@ -593,7 +590,6 @@ const cpuPlay = () => {
           drawCard();
         }
         // Now change the player after drawing is complete
-        changePlayer();
       } else {
         // Normal CPU play logic
         const playableCard = currentPlayer.hand.find(canPlayCard);
