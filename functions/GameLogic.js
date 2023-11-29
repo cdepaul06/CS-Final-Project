@@ -2,7 +2,7 @@
 var players = []; // Array to hold each player's hand
 var deck = []; // Array to hold the deck of cards
 var discardPile = []; // Array to hold the discard pile
-let cpuPlayTimeout; // Variable to hold the interval for CPU play
+let cpuPlayTimeout = null; // Variable to hold the interval for CPU play
 var currentColorInPlay = ""; // Variable to hold the current color in play
 var maxDrawCount = 0; // Variable to hold the max number of cards to draw
 var drawnCount = 0; // Variable to hold the number of cards drawn
@@ -274,11 +274,27 @@ const startGame = () => {
   }
 
   if (discardPile[discardPile.length - 1].dataset.type === "Reverse") {
-    players.reverse();
-    currentPlayer = players[0];
+    if (players.length === 2) {
+      // If there are only two players, act like a skip card
+      changePlayer();
+    } else {
+      // For more than two players, reverse the order
+      players.reverse();
+      let reversePlayerIndex = players.findIndex(
+        (p) => p.name === currentPlayer.name
+      );
+      currentPlayer = players[(reversePlayerIndex + 1) % players.length];
+    }
+  } else if (discardPile[discardPile.length - 1].dataset.type === "Skip") {
+    changePlayer(); // Skip the next player
+    if (opponentCount === 1) {
+      // If there is only one opponent, it's your turn again
+      changePlayer();
+    }
+  }
+
+  if (currentPlayer.name !== playerName) {
     startCPUPlay();
-  } else {
-    currentPlayer = players[0];
   }
 
   turnLogText.push(`${currentPlayer.name}'s turn.`);
@@ -322,11 +338,15 @@ const dealCards = () => {
 
 // Function to draw a card from the pile of cards
 const drawCard = () => {
+  // Check if the deck is not empty
   if (deck.length > 0) {
+    // Draw a card
     const card = deck.shift();
-    const playerHand = currentPlayer.hand;
-    playerHand.push(card);
+    currentPlayer.hand.push(card);
 
+    console.log("current player", currentPlayer.hand.length);
+
+    // Update the UI for the drawn card
     if (currentPlayer.name === playerName) {
       const playerCardsContainer = document.getElementById("player-cards");
       playerCardsContainer.appendChild(card);
@@ -337,6 +357,8 @@ const drawCard = () => {
       );
       determineCPUContainer(players.indexOf(currentPlayer), backCardCanvas);
     }
+
+    // Log the draw
     turnLogText.push(
       `${currentPlayer.name} drew a card. They now have ${currentPlayer.hand.length} cards.`
     );
@@ -345,8 +367,22 @@ const drawCard = () => {
       .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
       .join("");
 
-    if (currentPlayer.name !== playerName) {
-      startCPUPlay();
+    // Increment the drawn card count
+    drawnCount++;
+
+    // Check if the player has drawn the max number of cards or if it's a human player who drew a playable card
+    if (
+      drawnCount >= maxDrawCount ||
+      (currentPlayer.name === playerName && isLegalPlay(card))
+    ) {
+      // Reset drawn count and max draw count for the next player
+      drawnCount = 0;
+      maxDrawCount = 0;
+      changePlayer();
+
+      if (currentPlayer.name !== playerName) {
+        startCPUPlay();
+      }
     }
   }
 };
@@ -355,10 +391,6 @@ const drawCard = () => {
 const isLegalPlay = (card) => {
   // Get the last card from the discard pile
   const topDiscard = discardPile[discardPile.length - 1];
-
-  if (currentPlayer.hand.length === 1) {
-    playAlert("UNO!");
-  }
 
   // Check if the played card matches the top card of the discard pile in color or type,
   // or if the played card is a Wild or Wild Draw 4 card.
@@ -383,22 +415,23 @@ const isLegalPlay = (card) => {
 // Function to play a card
 const playCard = (card) => {
   if (
-    card.dataset.type == "Wild" ||
-    card.dataset.type == "Skip" ||
-    card.dataset.type == "Draw4" ||
-    card.dataset.type == "Reverse" ||
-    card.dataset.type == "Draw2"
+    card.dataset.type === "Wild" ||
+    card.dataset.type === "Skip" ||
+    card.dataset.type === "Draw4" ||
+    card.dataset.type === "Reverse" ||
+    card.dataset.type === "Draw2"
   ) {
     playAlert(card.dataset.type);
   }
+  const topCard = document.getElementById("discarded-card");
 
   if (isLegalPlay(card)) {
-    const topCard = document.getElementById("discarded-card");
+    // Update the UI to reflect the played card
     if (topCard) {
       cardPlaySound.play();
       topCard.replaceWith(card);
-      card.id = "discarded-card"; // Assigning the ID to the new card
-      card.onclick = null; // Removing the onclick event from the new card
+      card.id = "discarded-card";
+      card.onclick = null;
       turnLogText.push(
         `${currentPlayer.name} played a ${card.dataset.color} ${card.dataset.type}.`
       );
@@ -406,46 +439,68 @@ const playCard = (card) => {
       gameLog.innerHTML = turnLogText
         .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
         .join("");
+    }
 
-      if (card.dataset.type == "Wild" || card.dataset.type == "Draw4") {
-        checkForColorChange(card);
+    // Check for UNO condition after the card is played
+    if (currentPlayer.hand.length === 1) {
+      playAlert("UNO!");
+    }
+
+    // Check for a winner
+    if (checkForWinner()) {
+      endGame();
+      return;
+    }
+
+    // Handle special cards
+    if (card.dataset.type === "Reverse") {
+      if (players.length === 2) {
+        changePlayer();
+      } else {
+        players.reverse();
+        let reversePlayerIndex = players.findIndex(
+          (p) => p.name === currentPlayer.name
+        );
+        currentPlayer = players[(reversePlayerIndex + 1) % players.length];
       }
-
-      if (card.dataset.type == "Draw2") {
-        maxDrawCount = 2;
+    } else if (card.dataset.type === "Skip") {
+      changePlayer();
+      if (opponentCount === 1) {
+        changePlayer();
       }
-
-      if (card.dataset.type == "Draw4") {
+    } else if (card.dataset.type === "Wild" || card.dataset.type === "Draw4") {
+      checkForColorChange(card);
+      if (card.dataset.type === "Draw4") {
         maxDrawCount = 4;
       }
-
-      // if a reverse card is played, reverse the order of the players starting at the index of the current player
-      if (card.dataset.type === "Reverse") {
-        players.reverse();
-        let currentPlayerIndex =
-          (players.indexOf(currentPlayer) + 1) % players.length;
-        currentPlayer = players[currentPlayerIndex];
-      }
-
-      // if a skip card is played, skip the next player
-      if (card.dataset.type === "Skip") {
-        changePlayer(false);
-      }
-
-      changePlayer();
-      let currentPlayerIndex = players.indexOf(currentPlayer);
-      if (currentPlayerIndex !== players[0]) {
-        startCPUPlay();
-      } else {
+      if (currentPlayer.name === playerName) {
         return;
       }
-    } else {
-      console.error("Something is broken!");
+    } else if (card.dataset.type === "Draw2") {
+      maxDrawCount = 2;
+    }
+
+    // Change player after a Draw2/Draw4 card or other regular cards
+    if (card.dataset.type === "Draw2" || card.dataset.type === "Draw4") {
+      changePlayer();
+      if (currentPlayer.name !== playerName) {
+        startCPUPlay();
+      }
+      return;
+    }
+
+    changePlayer();
+    if (currentPlayer.name !== playerName) {
+      startCPUPlay();
     }
   } else {
-    playAlert("Illegal Play, please try again. ");
+    playAlert("Illegal Play, please try again.");
   }
-  clearTimeout(cpuPlayTimeout);
+
+  // Error handling if the top card is not found
+  if (!topCard) {
+    console.error("Something is broken!");
+  }
 };
 
 const checkForColorChange = (card) => {
@@ -465,7 +520,6 @@ const checkForColorChange = (card) => {
     turnLogText.push(
       `${currentPlayer.name} changed the color to ${currentColorInPlay}.`
     );
-    changePlayer();
   }
 };
 
@@ -484,17 +538,25 @@ const setCurrentColor = () => {
   var modal = document.getElementById("colorSelectDialog");
   modal.style.display = "none";
 
+  // Check if it's the start of the game and the first card is a Wild
+  if (
+    discardPile.length === 1 &&
+    (discardPile[0].dataset.type === "Wild" ||
+      discardPile[0].dataset.type === "Draw4")
+  ) {
+    // Do not change player, let the human player continue their turn
+    return;
+  }
+
+  changePlayer();
+
   if (currentPlayer.name !== playerName) {
     startCPUPlay(); // Starting the next CPU play if it's not the human player's turn
   }
 };
 
 // function to change currentPlayer
-const changePlayer = (shouldChange = true) => {
-  if (!shouldChange) {
-    return;
-  }
-
+const changePlayer = () => {
   const currentPlayerIndex = players.indexOf(currentPlayer);
   const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
   currentPlayer = players[nextPlayerIndex];
@@ -518,31 +580,35 @@ const cpuPlay = () => {
   cpuPlayTimeout = 3000;
   if (currentPlayer.name !== playerName) {
     setTimeout(() => {
-      if (currentPlayer.name !== playerName) {
-        const topCard = document.getElementById("discarded-card");
-        const topCardColor = topCard.dataset.color;
-        const topCardType = topCard.dataset.type;
-
-        // Check if the current player has a playable card
-        const playableCard = currentPlayer.hand.find((card) => {
-          if (card.dataset.type === "Wild" || card.dataset.type === "Draw4") {
-            return true;
-          } else if (card.dataset.color === topCardColor) {
-            return true;
-          } else if (card.dataset.type === topCardType) {
-            return true;
-          }
-          return false;
-        });
+      if (maxDrawCount > 0) {
+        // CPU needs to draw cards due to Draw2 or Draw4
+        while (drawnCount < maxDrawCount) {
+          drawCard();
+        }
+        // Reset for next player and change player
+        maxDrawCount = 0;
+        drawnCount = 0;
+        changePlayer();
+        return; // Stop further actions in this call
+      } else {
+        // Normal CPU play logic
+        const playableCard = currentPlayer.hand.find((card) =>
+          isLegalPlay(card)
+        );
 
         if (playableCard) {
           playCard(playableCard);
+          if (checkForWinner()) {
+            endGame();
+            return;
+          }
         } else {
           drawCard();
         }
       }
     }, cpuPlayTimeout);
   }
+  clearTimeout(cpuPlayTimeout);
 };
 
 const playAlert = (message) => {
@@ -553,6 +619,22 @@ const playAlert = (message) => {
   setTimeout(() => {
     x.className = x.className.replace("show", "");
   }, 3000);
+};
+
+// check to see if a player has won the game
+const checkForWinner = () => {
+  if (currentPlayer.hand.length === 0) {
+    playAlert(`${currentPlayer.name} has won the game!`);
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const endGame = () => {
+  setTimeout(() => {
+    window.location.href = "index.html";
+  }, 5000); // Redirect after 3 seconds
 };
 
 //#region Event Listeners
