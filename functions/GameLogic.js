@@ -116,9 +116,9 @@ const createBackCardElement = (color, type) => {
   };
 
   // Store the actual card information in the dataset
+  canvas.classList.add("card-back");
   canvas.dataset.color = color;
   canvas.dataset.type = type;
-
   return canvas;
 };
 
@@ -337,11 +337,8 @@ const dealCards = () => {
   console.log("Cards dealt.");
 };
 
-// Function to draw a card from the pile of cards
 const drawCard = () => {
-  // Check if the deck is not empty
   if (deck.length > 0) {
-    // Draw a card
     const card = deck.shift();
     currentPlayer.hand.push(card);
 
@@ -357,29 +354,36 @@ const drawCard = () => {
       determineCPUContainer(players.indexOf(currentPlayer), backCardCanvas);
     }
 
-    // Log the draw
     turnLogText.push(
       `${currentPlayer.name} drew a card. They now have ${currentPlayer.hand.length} cards.`
     );
     updateGameLog();
 
-    // Increment the drawn card count
     drawnCount++;
 
-    // Check if the player has drawn the max number of cards or if it's a human player who drew a playable card
-    if (
-      drawnCount == maxDrawCount ||
-      (currentPlayer.name === playerName && isLegalPlay(card))
-    ) {
-      // Reset drawn count and max draw count for the next player
-      drawnCount = 0;
-      maxDrawCount = 0;
-      changePlayer();
-
-      if (currentPlayer.name !== playerName) {
-        startCPUPlay();
+    // Check conditions for changing the player
+    if (currentPlayer.name === playerName) {
+      if (drawnCount >= maxDrawCount || !isLegalPlay(card)) {
+        // If the player has drawn the max number of cards due to a penalty or the card is not playable
+        changePlayerAndStartNextTurn();
+      }
+      // If the drawn card is playable, the player can choose to play it; don't change player automatically
+    } else {
+      // For CPU player
+      if (drawnCount >= maxDrawCount) {
+        // CPU has drawn the required number of cards; change player
+        changePlayerAndStartNextTurn();
       }
     }
+  }
+};
+
+const changePlayerAndStartNextTurn = () => {
+  drawnCount = 0;
+  maxDrawCount = 0;
+  changePlayer();
+  if (currentPlayer.name !== playerName) {
+    startCPUPlay();
   }
 };
 
@@ -408,6 +412,52 @@ const isLegalPlay = (card) => {
   return false;
 };
 
+const flipCardToFront = (card) => {
+  if (card.classList.contains("card-back")) {
+    const ctx = card.getContext("2d");
+    ctx.clearRect(0, 0, cardWidth, cardHeight);
+
+    // Retrieve the color and type from the dataset
+    const color = card.dataset.color;
+    const type = card.dataset.type;
+
+    // Find the index of the card
+    const num = findCardIndex(color, type);
+
+    // Calculate x and y based on the index
+    const x = (num % 14) * cardWidth;
+    let y = Math.floor(num / 14) * cardHeight;
+
+    // Adjust y for rows 5-8 to skip the blank card
+    if (y >= 4 * cardHeight) {
+      y += cardHeight; // Skip the height of one card for rows 5-8
+    }
+
+    ctx.drawImage(
+      cardImage,
+      x,
+      y,
+      cardWidth,
+      cardHeight,
+      0,
+      0,
+      cardWidth,
+      cardHeight
+    );
+    card.classList.remove("card-back");
+  }
+};
+
+const findCardIndex = (color, type) => {
+  for (let i = 0; i < 108; i++) {
+    // There are 108 cards in the deck
+    if (cardColor(i) === color && cardType(i).toString() === type.toString()) {
+      return i;
+    }
+  }
+  return -1; // Return -1 if not found
+};
+
 // Function to play a card
 const playCard = (card) => {
   if (
@@ -419,6 +469,12 @@ const playCard = (card) => {
   ) {
     playAlert(card.dataset.type);
   }
+
+  // If it's a CPU player, update the card's appearance
+  if (currentPlayer.name !== playerName) {
+    flipCardToFront(card);
+  }
+
   const topCard = document.getElementById("discarded-card");
 
   if (isLegalPlay(card)) {
@@ -608,6 +664,8 @@ const cpuPlay = () => {
   clearTimeout(cpuPlayTimeout);
 };
 
+//#endregion
+
 const playAlert = (message) => {
   var x = document.getElementById("toast");
   x.className = "show";
@@ -631,7 +689,7 @@ const checkForWinner = () => {
 const endGame = () => {
   setTimeout(() => {
     window.location.href = "index.html";
-  }, 5000); // Redirect after 3 seconds
+  }, 5000); // Redirect after 5 seconds
 };
 
 //#region Event Listeners
