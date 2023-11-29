@@ -250,14 +250,13 @@ const startGame = () => {
   // Close the modal after selection
   document.getElementById("opponentSelectDialog").style.display = "none";
   initializePlayers(opponentCount, playerName);
+  currentPlayer = players[0];
   var playerNameDisplay = document.getElementById("playerNameDisplay");
   playerNameDisplay.innerHTML = playerName;
   playerNameDisplay.style.display = "block";
   shuffleDeck();
   dealCards();
   initializeDiscardPile();
-
-  currentPlayer = players[0];
 
   currentColorInPlay = discardPile[discardPile.length - 1].dataset.color;
   if (discardPile[discardPile.length - 1].dataset.type === "Draw4") {
@@ -298,11 +297,15 @@ const startGame = () => {
   }
 
   turnLogText.push(`${currentPlayer.name}'s turn.`);
+  updateGameLog();
+  console.log("Game started.");
+};
+
+const updateGameLog = () => {
   const gameLog = document.getElementById("game-log");
   gameLog.innerHTML = turnLogText
     .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
     .join("");
-  console.log("Game started.");
 };
 
 //#endregion
@@ -314,9 +317,7 @@ const dealCards = () => {
     players.forEach((player, index) => {
       if (deck.length > 0) {
         const card = deck.shift();
-        if (
-          player.name === document.getElementById("playerName").value.trim()
-        ) {
+        if (player.name === playerName) {
           // Dealing to the human player
           player.hand.push(card);
           const playerCardsContainer = document.getElementById("player-cards");
@@ -334,6 +335,7 @@ const dealCards = () => {
     });
   }
   console.log("Cards dealt.");
+  console.log("deal cards players hand", players);
 };
 
 // Function to draw a card from the pile of cards
@@ -343,8 +345,6 @@ const drawCard = () => {
     // Draw a card
     const card = deck.shift();
     currentPlayer.hand.push(card);
-
-    console.log("current player", currentPlayer.hand.length);
 
     // Update the UI for the drawn card
     if (currentPlayer.name === playerName) {
@@ -362,17 +362,14 @@ const drawCard = () => {
     turnLogText.push(
       `${currentPlayer.name} drew a card. They now have ${currentPlayer.hand.length} cards.`
     );
-    const gameLog = document.getElementById("game-log");
-    gameLog.innerHTML = turnLogText
-      .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
-      .join("");
+    updateGameLog();
 
     // Increment the drawn card count
     drawnCount++;
 
     // Check if the player has drawn the max number of cards or if it's a human player who drew a playable card
     if (
-      drawnCount >= maxDrawCount ||
+      drawnCount == maxDrawCount ||
       (currentPlayer.name === playerName && isLegalPlay(card))
     ) {
       // Reset drawn count and max draw count for the next player
@@ -385,6 +382,8 @@ const drawCard = () => {
       }
     }
   }
+  console.log("draw cards players hand", players);
+  console.log("end draw current player", currentPlayer);
 };
 
 // Logic to determine if legal play was made
@@ -435,10 +434,7 @@ const playCard = (card) => {
       turnLogText.push(
         `${currentPlayer.name} played a ${card.dataset.color} ${card.dataset.type}.`
       );
-      const gameLog = document.getElementById("game-log");
-      gameLog.innerHTML = turnLogText
-        .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
-        .join("");
+      updateGameLog();
     }
 
     // Check for UNO condition after the card is played
@@ -501,6 +497,7 @@ const playCard = (card) => {
   if (!topCard) {
     console.error("Something is broken!");
   }
+  console.log("play card players hand", players);
 };
 
 const checkForColorChange = (card) => {
@@ -520,6 +517,7 @@ const checkForColorChange = (card) => {
     turnLogText.push(
       `${currentPlayer.name} changed the color to ${currentColorInPlay}.`
     );
+    updateGameLog();
   }
 };
 
@@ -530,10 +528,7 @@ const setCurrentColor = () => {
   turnLogText.push(
     `${currentPlayer.name} changed the color to ${currentColorInPlay}.`
   );
-  const gameLog = document.getElementById("game-log");
-  gameLog.innerHTML = turnLogText
-    .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
-    .join("");
+  updateGameLog();
 
   var modal = document.getElementById("colorSelectDialog");
   modal.style.display = "none";
@@ -563,10 +558,7 @@ const changePlayer = () => {
 
   drawnCount = 0;
   turnLogText.push(`${currentPlayer.name}'s turn.`);
-  const gameLog = document.getElementById("game-log");
-  gameLog.innerHTML = turnLogText
-    .map((turn, index) => `<p>${index + 1}. ${turn}</p>`)
-    .join("");
+  updateGameLog();
 };
 
 const startCPUPlay = () => {
@@ -575,27 +567,36 @@ const startCPUPlay = () => {
   }
 };
 
+const canPlayCard = (card) => {
+  const topDiscard = discardPile[discardPile.length - 1];
+
+  // Check if the card can be legally played
+  if (card.dataset.type === "Wild" || card.dataset.type === "Draw4") {
+    return true; // Wild and Wild Draw 4 cards can be played on anything
+  } else if (
+    card.dataset.color === topDiscard.dataset.color ||
+    card.dataset.type === topDiscard.dataset.type
+  ) {
+    return true; // Same color or type can be played
+  }
+
+  return false; // Card cannot be played
+};
+
 // If the current player which is not human has a playable card, use the playCard function
 const cpuPlay = () => {
-  cpuPlayTimeout = 3000;
   if (currentPlayer.name !== playerName) {
     setTimeout(() => {
       if (maxDrawCount > 0) {
-        // CPU needs to draw cards due to Draw2 or Draw4
+        // Draw the required cards
         while (drawnCount < maxDrawCount) {
           drawCard();
         }
-        // Reset for next player and change player
-        maxDrawCount = 0;
-        drawnCount = 0;
+        // Now change the player after drawing is complete
         changePlayer();
-        return; // Stop further actions in this call
       } else {
         // Normal CPU play logic
-        const playableCard = currentPlayer.hand.find((card) =>
-          isLegalPlay(card)
-        );
-
+        const playableCard = currentPlayer.hand.find(canPlayCard);
         if (playableCard) {
           playCard(playableCard);
           if (checkForWinner()) {
